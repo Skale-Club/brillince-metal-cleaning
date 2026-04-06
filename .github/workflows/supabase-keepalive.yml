@@ -1,0 +1,50 @@
+name: Supabase Keepalive
+
+on:
+  schedule:
+    # Every 6 hours to avoid long idle windows
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve database URL secret
+        shell: bash
+        run: |
+          DB_URL="${{ secrets.SUPABASE_DATABASE_URL }}"
+          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.DATABASE_URL }}"; fi
+          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.POSTGRES_URL }}"; fi
+          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.POSTGRES_URL_NON_POOLING }}"; fi
+          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.POSTGRES_PRISMA_URL }}"; fi
+          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.SUPABASE_DB_URL }}"; fi
+
+          if [ -z "${DB_URL}" ]; then
+            echo "::error title=Missing DB URL secret::Set one of these GitHub Actions secrets: SUPABASE_DATABASE_URL, DATABASE_URL, POSTGRES_URL, POSTGRES_URL_NON_POOLING, POSTGRES_PRISMA_URL, SUPABASE_DB_URL."
+            exit 1
+          fi
+
+          {
+            echo "DATABASE_URL<<EOF"
+            echo "${DB_URL}"
+            echo "EOF"
+            echo "SUPABASE_DATABASE_URL<<EOF"
+            echo "${DB_URL}"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Write heartbeat timestamp in Supabase
+        run: npx tsx scripts/supabase-keepalive.ts

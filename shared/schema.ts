@@ -1,0 +1,678 @@
+import { pgTable, text, serial, integer, numeric, timestamp, boolean, jsonb, uuid, pgEnum, uniqueIndex, index, check } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+import type { AnalyticsChannel, AnalyticsEventName } from "./analytics-events.js";
+
+// Auth models (inlined for drizzle-kit compatibility)
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: text("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)]
+);
+
+export const users = pgTable("users", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").unique(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  profileImageUrl: text("profile_image_url"),
+  isAdmin: boolean("is_admin").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+
+// === TABLE DEFINITIONS ===
+
+// GoHighLevel Integration Settings
+export const integrationSettings = pgTable("integration_settings", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull().default("gohighlevel"), // gohighlevel, etc.
+  apiKey: text("api_key"), // Encrypted API key
+  locationId: text("location_id"),
+  calendarId: text("calendar_id").default("2irhr47AR6K0AQkFqEQl"),
+  isEnabled: boolean("is_enabled").default(false),
+  enabledAt: timestamp("enabled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const analyticsEventHits = pgTable("analytics_event_hits", {
+  id: serial("id").primaryKey(),
+  eventName: text("event_name").$type<AnalyticsEventName>().notNull(),
+  channels: jsonb("channels").$type<Partial<Record<AnalyticsChannel, boolean>>>().default({}),
+  pagePath: text("page_path"),
+  sessionId: text("session_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  eventNameIdx: index("analytics_event_hits_event_name_idx").on(table.eventName),
+  createdAtIdx: index("analytics_event_hits_created_at_idx").on(table.createdAt),
+}));
+
+// Chat Settings (singleton table - only one row)
+export const chatSettings = pgTable("chat_settings", {
+  id: serial("id").primaryKey(),
+  enabled: boolean("enabled").default(false),
+  agentName: text("agent_name").default(""),
+  agentAvatarUrl: text("agent_avatar_url").default(""),
+  systemPrompt: text("system_prompt").default(
+    "You are our helpful chat assistant. Provide concise, friendly answers. Use the provided tools to fetch services and details. Do not guess prices; always use tool data when relevant. Guide visitors to complete the lead form when they are ready."
+  ),
+  welcomeMessage: text("welcome_message").default("Hi! How can I help you today?"),
+  avgResponseTime: text("avg_response_time").default(""),
+  calendarProvider: text("calendar_provider").default("gohighlevel"),
+  calendarId: text("calendar_id").default(""),
+  calendarStaff: jsonb("calendar_staff").default([]),
+  languageSelectorEnabled: boolean("language_selector_enabled").default(false),
+  defaultLanguage: text("default_language").default("en"),
+  lowPerformanceSmsEnabled: boolean("low_performance_sms_enabled").default(false),
+  lowPerformanceThresholdSeconds: integer("low_performance_threshold_seconds").default(300),
+  intakeObjectives: jsonb("intake_objectives").default([]),
+  excludedUrlRules: jsonb("excluded_url_rules").default([]),
+  useFaqs: boolean("use_faqs").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Chat Integrations (OpenAI)
+export const chatIntegrations = pgTable("chat_integrations", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull().default("openai"),
+  enabled: boolean("enabled").default(false),
+  model: text("model").default("gpt-4o-mini"),
+  apiKey: text("api_key"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Twilio Integration Settings
+export const twilioSettings = pgTable("twilio_settings", {
+  id: serial("id").primaryKey(),
+  enabled: boolean("enabled").default(false),
+  accountSid: text("account_sid"),
+  authToken: text("auth_token"),
+  fromPhoneNumber: text("from_phone_number"),
+  toPhoneNumber: text("to_phone_number"),
+  toPhoneNumbers: jsonb("to_phone_numbers").$type<string[]>().default([]),
+  notifyOnNewChat: boolean("notify_on_new_chat").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Resend Integration Settings
+export const resendSettings = pgTable("resend_settings", {
+  id: serial("id").primaryKey(),
+  enabled: boolean("enabled").default(false),
+  apiKey: text("api_key"),
+  fromEmail: text("from_email"),
+  fromName: text("from_name"),
+  toEmails: jsonb("to_emails").$type<string[]>().default([]),
+  notifyOnNewLead: boolean("notify_on_new_lead").default(true),
+  notifyOnNewContact: boolean("notify_on_new_contact").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const conversations = pgTable("conversations", {
+  id: uuid("id").primaryKey(),
+  status: text("status").notNull().default("open"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  lastMessageAt: timestamp("last_message_at"),
+  firstPageUrl: text("first_page_url"),
+  visitorName: text("visitor_name"),
+  visitorPhone: text("visitor_phone"),
+  visitorEmail: text("visitor_email"),
+}, (table) => ({
+  statusIdx: index("conversations_status_idx").on(table.status),
+  createdAtIdx: index("conversations_created_at_idx").on(table.createdAt),
+}));
+
+export const conversationMessages = pgTable("conversation_messages", {
+  id: uuid("id").primaryKey(),
+  conversationId: uuid("conversation_id").references(() => conversations.id, { onDelete: "cascade" }).notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  metadata: jsonb("metadata"),
+}, (table) => ({
+  conversationIdx: index("idx_conversation_messages_conversation_id").on(table.conversationId),
+}));
+
+export const leadClassificationEnum = pgEnum("lead_classificacao", [
+  "HOT",
+  "WARM",
+  "COLD",
+  "DISQUALIFIED",
+]);
+
+export const leadStatusEnum = pgEnum("lead_status", [
+  "novo",
+  "contatado",
+  "qualificado",
+  "convertido",
+  "descartado",
+]);
+
+export const formLeads = pgTable("form_leads", {
+  id: serial("id").primaryKey(),
+  sessionId: uuid("session_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow().$onUpdate(() => new Date()),
+  nome: text("nome").notNull(),
+  email: text("email"),
+  telefone: text("telefone"),
+  cidadeEstado: text("cidade_estado"),
+  tipoNegocio: text("tipo_negocio"),
+  tipoNegocioOutro: text("tipo_negocio_outro"),
+  tempoNegocio: text("tempo_negocio"),
+  experienciaMarketing: text("experiencia_marketing"),
+  orcamentoAnuncios: text("orcamento_anuncios"),
+  principalDesafio: text("principal_desafio"),
+  disponibilidade: text("disponibilidade"),
+  expectativaResultado: text("expectativa_resultado"),
+  scoreTotal: integer("score_total").notNull().default(0),
+  classificacao: leadClassificationEnum("classificacao"),
+  scoreTipoNegocio: integer("score_tipo_negocio").notNull().default(0),
+  scoreTempoNegocio: integer("score_tempo_negocio").notNull().default(0),
+  scoreExperiencia: integer("score_experiencia").notNull().default(0),
+  scoreOrcamento: integer("score_orcamento").notNull().default(0),
+  scoreDesafio: integer("score_desafio").notNull().default(0),
+  scoreDisponibilidade: integer("score_disponibilidade").notNull().default(0),
+  scoreExpectativa: integer("score_expectativa").notNull().default(0),
+  tempoTotalSegundos: integer("tempo_total_segundos"),
+  userAgent: text("user_agent"),
+  urlOrigem: text("url_origem"),
+  utmSource: text("utm_source"),
+  utmMedium: text("utm_medium"),
+  utmCampaign: text("utm_campaign"),
+  status: leadStatusEnum("status").notNull().default("novo"),
+  formCompleto: boolean("form_completo").notNull().default(false),
+  ultimaPerguntaRespondida: integer("ultima_pergunta_respondida").notNull().default(0),
+  notificacaoEnviada: boolean("notificacao_enviada").notNull().default(false),
+  notificacaoAbandonoEnviada: boolean("notificacao_abandono_enviada").notNull().default(false),
+  dataContato: timestamp("data_contato"),
+  observacoes: text("observacoes"),
+  customAnswers: jsonb("custom_answers").$type<Record<string, string>>().default({}),
+  ghlContactId: text("ghl_contact_id"),
+  ghlSyncStatus: text("ghl_sync_status").default("pending"),
+  source: text("source").default("form"),
+  conversationId: uuid("conversation_id").references(() => conversations.id),
+}, (table) => ({
+  emailIdx: index("form_leads_email_idx").on(table.email),
+  classificacaoIdx: index("form_leads_classificacao_idx").on(table.classificacao),
+  createdAtIdx: index("form_leads_created_at_idx").on(table.createdAt),
+  statusIdx: index("form_leads_status_idx").on(table.status),
+  sessionIdx: uniqueIndex("form_leads_session_idx").on(table.sessionId),
+  sourceIdx: index("form_leads_source_idx").on(table.source),
+  conversationIdx: index("form_leads_conversation_idx").on(table.conversationId),
+}));
+
+// === SCHEMAS ===
+
+export const insertIntegrationSettingsSchema = createInsertSchema(integrationSettings).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
+export const insertAnalyticsEventHitSchema = createInsertSchema(analyticsEventHits).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertChatSettingsSchema = createInsertSchema(chatSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+export const insertChatIntegrationsSchema = createInsertSchema(chatIntegrations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertTwilioSettingsSchema = createInsertSchema(twilioSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertResendSettingsSchema = createInsertSchema(resendSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertConversationSchema = createInsertSchema(conversations).omit({
+  createdAt: true,
+  updatedAt: true,
+  lastMessageAt: true,
+});
+export const insertConversationMessageSchema = createInsertSchema(conversationMessages).omit({
+  createdAt: true,
+});
+export const insertFormLeadSchema = createInsertSchema(formLeads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+  formCompleto: true,
+  ultimaPerguntaRespondida: true,
+  notificacaoEnviada: true,
+  notificacaoAbandonoEnviada: true,
+  dataContato: true,
+  ghlContactId: true,
+  ghlSyncStatus: true,
+});
+
+const leadClassificationValues = leadClassificationEnum.enumValues as [string, ...string[]];
+const leadStatusValues = leadStatusEnum.enumValues as [string, ...string[]];
+
+export const formLeadProgressSchema = z.object({
+  sessionId: z.string().uuid(),
+  questionNumber: z.number().int().min(1).max(50),
+  nome: z.string().min(3).max(100).optional(),
+  email: z.string().max(255).optional().refine(
+    (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+    { message: 'Invalid email' }
+  ),
+  telefone: z.string().min(7).max(20).optional(),
+  cidadeEstado: z.string().min(3).max(100).optional(),
+  tipoNegocio: z.string().max(120).optional(),
+  tipoNegocioOutro: z.string().max(160).optional(),
+  tempoNegocio: z.string().max(120).optional(),
+  experienciaMarketing: z.string().max(160).optional(),
+  orcamentoAnuncios: z.string().max(120).optional(),
+  principalDesafio: z.string().max(160).optional(),
+  disponibilidade: z.string().max(120).optional(),
+  expectativaResultado: z.string().max(120).optional(),
+  scoreTotal: z.number().int().min(0).max(78).optional(),
+  scoreTipoNegocio: z.number().int().min(0).max(10).optional(),
+  scoreTempoNegocio: z.number().int().min(0).max(10).optional(),
+  scoreExperiencia: z.number().int().min(0).max(10).optional(),
+  scoreOrcamento: z.number().int().min(0).max(10).optional(),
+  scoreDesafio: z.number().int().min(0).max(10).optional(),
+  scoreDisponibilidade: z.number().int().min(0).max(10).optional(),
+  scoreExpectativa: z.number().int().min(0).max(10).optional(),
+  classificacao: z.enum(leadClassificationValues).optional(),
+  formCompleto: z.boolean().optional(),
+  tempoTotalSegundos: z.number().int().min(0).optional(),
+  urlOrigem: z.string().max(500).optional(),
+  utmSource: z.string().max(200).optional(),
+  utmMedium: z.string().max(200).optional(),
+  utmCampaign: z.string().max(200).optional(),
+  startedAt: z.string().optional(),
+  customAnswers: z.record(z.string()).optional(),
+});
+
+// === TYPES ===
+
+export type IntegrationSettings = typeof integrationSettings.$inferSelect;
+export type AnalyticsEventHit = typeof analyticsEventHits.$inferSelect;
+export type ChatSettings = typeof chatSettings.$inferSelect;
+export type ChatIntegrations = typeof chatIntegrations.$inferSelect;
+export type TwilioSettings = typeof twilioSettings.$inferSelect;
+export type ResendSettings = typeof resendSettings.$inferSelect;
+export type Conversation = typeof conversations.$inferSelect;
+export type ConversationMessage = typeof conversationMessages.$inferSelect;
+export type FormLead = typeof formLeads.$inferSelect;
+export type LeadClassification = typeof leadClassificationEnum.enumValues[number];
+export type LeadStatus = typeof leadStatusEnum.enumValues[number];
+
+export type InsertIntegrationSettings = z.infer<typeof insertIntegrationSettingsSchema>;
+export type InsertAnalyticsEventHit = z.infer<typeof insertAnalyticsEventHitSchema>;
+export type InsertChatSettings = z.infer<typeof insertChatSettingsSchema>;
+export type InsertChatIntegrations = z.infer<typeof insertChatIntegrationsSchema>;
+export type InsertTwilioSettings = z.infer<typeof insertTwilioSettingsSchema>;
+export type InsertResendSettings = z.infer<typeof insertResendSettingsSchema>;
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type InsertConversationMessage = z.infer<typeof insertConversationMessageSchema>;
+export type InsertFormLead = z.infer<typeof insertFormLeadSchema>;
+export type FormLeadProgressInput = z.infer<typeof formLeadProgressSchema>;
+
+// Day-by-day business hours type
+export interface DayHours {
+  isOpen: boolean;
+  start: string; // HH:MM
+  end: string;   // HH:MM
+}
+
+export interface BusinessHours {
+  monday: DayHours;
+  tuesday: DayHours;
+  wednesday: DayHours;
+  thursday: DayHours;
+  friday: DayHours;
+  saturday: DayHours;
+  sunday: DayHours;
+}
+
+export interface ConsultingStep {
+  order: number;
+  numberLabel: string;
+  icon?: string;
+  title: string;
+  whatWeDo: string;
+  outcome: string;
+}
+
+export interface ConsultingStepsSection {
+  enabled?: boolean;
+  sectionId?: string;
+  title?: string;
+  subtitle?: string;
+  steps?: ConsultingStep[];
+  practicalBlockTitle?: string;
+  practicalBullets?: string[];
+  ctaButtonLabel?: string;
+  ctaButtonLink?: string;
+  helperText?: string | null;
+  // Labels for customization
+  tagLabel?: string;
+  stepLabel?: string;
+  whatWeDoLabel?: string;
+  outcomeLabel?: string;
+  practicalBlockSubtitle?: string;
+  nextStepLabel?: string;
+  nextStepText?: string;
+}
+
+export interface HomepageContent {
+  heroBadgeImageUrl?: string;
+  heroBadgeAlt?: string;
+  trustBadges?: { title: string; description: string; icon?: string }[];
+  categoriesSection?: { title?: string; subtitle?: string; ctaText?: string };
+  reviewsSection?: { title?: string; subtitle?: string; embedUrl?: string };
+  blogSection?: { title?: string; subtitle?: string; viewAllText?: string; readMoreText?: string };
+  aboutSection?: {
+    label?: string;
+    heading?: string;
+    description?: string;
+    defaultImageUrl?: string;
+    highlights?: { title: string; description: string }[];
+  };
+  areasServedSection?: { label?: string; heading?: string; description?: string; ctaText?: string };
+  consultingStepsSection?: ConsultingStepsSection;
+}
+
+// Form Configuration Types
+export type FormQuestionType = 'text' | 'email' | 'tel' | 'select';
+
+export interface FormOption {
+  value: string;
+  label: string;
+  points: number;
+}
+
+export interface FormConditionalField {
+  showWhen: string;
+  id: string;
+  title: string;
+  placeholder: string;
+}
+
+export interface FormQuestion {
+  id: string;
+  order: number;
+  title: string;
+  type: FormQuestionType;
+  required: boolean;
+  placeholder?: string;
+  options?: FormOption[];
+  conditionalField?: FormConditionalField;
+  ghlFieldId?: string; // ID do custom field no GHL para sincronização
+}
+
+export interface FormConfig {
+  questions: FormQuestion[];
+  maxScore: number;
+  thresholds: {
+    hot: number;
+    warm: number;
+    cold: number;
+  };
+}
+
+export const DEFAULT_BUSINESS_HOURS: BusinessHours = {
+  monday: { isOpen: true, start: '08:00', end: '18:00' },
+  tuesday: { isOpen: true, start: '08:00', end: '18:00' },
+  wednesday: { isOpen: true, start: '08:00', end: '18:00' },
+  thursday: { isOpen: true, start: '08:00', end: '18:00' },
+  friday: { isOpen: true, start: '08:00', end: '18:00' },
+  saturday: { isOpen: false, start: '09:00', end: '14:00' },
+  sunday: { isOpen: false, start: '09:00', end: '14:00' },
+};
+
+// Company Settings (singleton table - only one row)
+export const companySettings = pgTable("company_settings", {
+  id: serial("id").primaryKey(),
+  companyName: text("company_name").default(''),
+  companyEmail: text("company_email").default(''),
+  companyPhone: text("company_phone").default(''),
+  companyAddress: text("company_address").default(''),
+  workingHoursStart: text("working_hours_start").default('08:00'),
+  workingHoursEnd: text("working_hours_end").default('18:00'),
+  logoMain: text("logo_main").default(''),
+  logoDark: text("logo_dark").default(''),
+  logoIcon: text("logo_icon").default(''),
+  sectionsOrder: text("sections_order").array(),
+  socialLinks: jsonb("social_links").default([]),
+  mapEmbedUrl: text("map_embed_url").default(''),
+  heroTitle: text("hero_title").default(''),
+  heroSubtitle: text("hero_subtitle").default(''),
+  heroImageUrl: text("hero_image_url").default(''),
+  heroBackgroundImageUrl: text("hero_background_image_url").default(''),
+  aboutImageUrl: text("about_image_url").default(''),
+  ctaText: text("cta_text").default(''),
+  websitePrimaryColor: text("website_primary_color").default('#1C53A3'),
+  websiteSecondaryColor: text("website_secondary_color").default('#FFFF01'),
+  websiteAccentColor: text("website_accent_color").default('#FFFF01'),
+  websiteBackgroundColor: text("website_background_color").default('#FFFFFF'),
+  websiteForegroundColor: text("website_foreground_color").default('#1D1D1D'),
+  websiteNavBackgroundColor: text("website_nav_background_color").default('#1C1E24'),
+  websiteFooterBackgroundColor: text("website_footer_background_color").default('#18191F'),
+  websiteCtaBackgroundColor: text("website_cta_background_color").default('#406EF1'),
+  websiteCtaHoverColor: text("website_cta_hover_color").default('#355CD0'),
+  timeFormat: text("time_format").default('12h'), // '12h' or '24h'
+  businessHours: jsonb("business_hours"), // Day-by-day business hours
+  seoTitle: text("seo_title").default(''),
+  seoDescription: text("seo_description").default(''),
+  ogImage: text("og_image").default(''),
+  // Extended SEO fields
+  seoKeywords: text("seo_keywords").default(''),
+  seoAuthor: text("seo_author").default(''),
+  seoCanonicalUrl: text("seo_canonical_url").default(''),
+  seoRobotsTag: text("seo_robots_tag").default('index, follow'),
+  // Open Graph extended
+  ogType: text("og_type").default('website'),
+  ogSiteName: text("og_site_name").default(''),
+  facebookAppId: text("facebook_app_id").default(''),
+  // Twitter Cards
+  twitterCard: text("twitter_card").default('summary_large_image'),
+  twitterSite: text("twitter_site").default(''),
+  twitterCreator: text("twitter_creator").default(''),
+  // Schema.org LocalBusiness
+  schemaLocalBusiness: jsonb("schema_local_business").default({}),
+  // Marketing Analytics
+  gtmContainerId: text("gtm_container_id").default(''), // GTM-XXXXXXX
+  ga4MeasurementId: text("ga4_measurement_id").default(''), // G-XXXXXXXXXX
+  facebookPixelId: text("facebook_pixel_id").default(''), // Numeric ID
+  gtmEnabled: boolean("gtm_enabled").default(false),
+  ga4Enabled: boolean("ga4_enabled").default(false),
+  facebookPixelEnabled: boolean("facebook_pixel_enabled").default(false),
+  gtmEnabledAt: timestamp("gtm_enabled_at"),
+  ga4EnabledAt: timestamp("ga4_enabled_at"),
+  facebookPixelEnabledAt: timestamp("facebook_pixel_enabled_at"),
+  homepageContent: jsonb("homepage_content").$type<HomepageContent>().default({}),
+  formConfig: jsonb("form_config").$type<FormConfig>(),
+});
+
+export const insertCompanySettingsSchema = createInsertSchema(companySettings, {
+  homepageContent: z.custom<HomepageContent>().optional().nullable(),
+  formConfig: z.custom<FormConfig>().optional().nullable(),
+}).omit({ id: true });
+export type CompanySettings = typeof companySettings.$inferSelect;
+export type InsertCompanySettings = z.infer<typeof insertCompanySettingsSchema>;
+
+// FAQ table
+export const faqs = pgTable("faqs", {
+  id: serial("id").primaryKey(),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  order: integer("order").default(0),
+}, (table) => ({
+  orderIdx: index("faqs_order_idx").on(table.order),
+}));
+
+export const insertFaqSchema = createInsertSchema(faqs).omit({ id: true });
+export type Faq = typeof faqs.$inferSelect;
+export type InsertFaq = z.infer<typeof insertFaqSchema>;
+
+// Blog Posts table
+export const blogPosts = pgTable("blog_posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull(),
+  excerpt: text("excerpt"),
+  metaDescription: text("meta_description"),
+  focusKeyword: text("focus_keyword"),
+  tags: text("tags"),
+  featureImageUrl: text("feature_image_url"),
+  status: text("status").notNull().default("draft"),
+  authorName: text("author_name").default("Admin"),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  statusIdx: index("blog_posts_status_idx").on(table.status),
+  publishedAtIdx: index("blog_posts_published_at_idx").on(table.publishedAt),
+  slugIdx: index("blog_posts_slug_idx").on(table.slug),
+}));
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+}).extend({
+  publishedAt: z.union([z.string(), z.date(), z.null()]).optional().transform(val => {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    return new Date(val);
+  }),
+});
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+
+// Service Posts table
+export const servicePosts = pgTable("service_posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull().default(""),
+  excerpt: text("excerpt"),
+  metaDescription: text("meta_description"),
+  focusKeyword: text("focus_keyword"),
+  featureImageUrl: text("feature_image_url"),
+  status: text("status").notNull().default("published"),
+  order: integer("order").default(0),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  statusOrderIdx: index("service_posts_status_order_idx").on(table.status, table.order),
+  slugIdx: index("service_posts_slug_idx").on(table.slug),
+}));
+
+export const insertServicePostSchema = createInsertSchema(servicePosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  publishedAt: z.union([z.string(), z.date(), z.null()]).optional().transform((val) => {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    return new Date(val);
+  }),
+});
+
+export type ServicePost = typeof servicePosts.$inferSelect;
+export type InsertServicePost = z.infer<typeof insertServicePostSchema>;
+
+// Gallery Images
+export const galleryImages = pgTable("gallery_images", {
+  id: serial("id").primaryKey(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  title: text("title").notNull().default(""),
+  altText: text("alt_text").notNull().default(""),
+  description: text("description"),
+  imageUrl: text("image_url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertGalleryImageSchema = createInsertSchema(galleryImages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type GalleryImage = typeof galleryImages.$inferSelect;
+export type InsertGalleryImage = z.infer<typeof insertGalleryImageSchema>;
+
+// Reviews module
+export const reviewsSettings = pgTable("reviews_settings", {
+  id: serial("id").primaryKey(),
+  sectionTitle: text("section_title").notNull().default(""),
+  sectionSubtitle: text("section_subtitle").notNull().default(""),
+  displayMode: text("display_mode").notNull().default("auto"), // auto | widget | fallback
+  widgetEnabled: boolean("widget_enabled").notNull().default(false),
+  widgetEmbedUrl: text("widget_embed_url").notNull().default(""),
+  fallbackEnabled: boolean("fallback_enabled").notNull().default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const reviewItems = pgTable("review_items", {
+  id: serial("id").primaryKey(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  authorName: text("author_name").notNull(),
+  authorMeta: text("author_meta").notNull().default(""),
+  content: text("content").notNull(),
+  rating: integer("rating").notNull().default(5),
+  sourceLabel: text("source_label").notNull().default(""),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  sortOrderIdx: index("review_items_sort_order_idx").on(table.sortOrder, table.createdAt),
+  ratingRange: check("review_items_rating_range", sql`${table.rating} >= 1 AND ${table.rating} <= 5`),
+}));
+
+const reviewsDisplayModeSchema = z.enum(["auto", "widget", "fallback"]);
+
+export const insertReviewsSettingsSchema = createInsertSchema(reviewsSettings).omit({
+  id: true,
+  updatedAt: true,
+}).extend({
+  displayMode: reviewsDisplayModeSchema.optional(),
+});
+
+export const insertReviewItemSchema = createInsertSchema(reviewItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  authorName: z.string().min(1).max(120),
+  authorMeta: z.string().max(160).optional(),
+  content: z.string().min(1).max(1200),
+  rating: z.number().int().min(1).max(5).optional(),
+  sourceLabel: z.string().max(120).optional(),
+  sortOrder: z.number().int().min(0).optional(),
+});
+
+export type ReviewsSettings = typeof reviewsSettings.$inferSelect;
+export type ReviewItem = typeof reviewItems.$inferSelect;
+export type InsertReviewsSettings = z.infer<typeof insertReviewsSettingsSchema>;
+export type InsertReviewItem = z.infer<typeof insertReviewItemSchema>;

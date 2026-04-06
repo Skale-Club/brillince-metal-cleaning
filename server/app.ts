@@ -1,0 +1,100 @@
+import express, { type Request, Response, NextFunction } from "express";
+import compression from "compression";
+import { registerRoutes } from "./routes.js";
+import { initializeSchemas } from "./storage.js";
+import path from "path";
+import { createServer, type Server } from "http";
+
+const shouldCaptureApiResponses =
+  process.env.LOG_API_RESPONSES === "true" || process.env.NODE_ENV !== "production";
+const shouldInitializeRuntimeSchemas =
+  process.env.ENABLE_RUNTIME_SCHEMA_INIT === "true" ||
+  !(process.env.NODE_ENV === "production" && process.env.VERCEL);
+
+declare module "http" {
+  interface IncomingMessage {
+    rawBody: unknown;
+  }
+}
+
+export function log(message: string, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+
+export async function createApp(): Promise<{ app: express.Express; httpServer: Server }> {
+  const app = express();
+  app.use(compression());
+
+  // Serve attached_assets as static files
+  app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
+
+  app.use(
+    express.json({
+      limit: '50mb',
+      verify: (req, _res, buf) => {
+        req.rawBody = buf;
+      },
+    }),
+  );
+
+  app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+
+  // Logging middleware
+  app.use((req, res, next) => {
+    const start = Date.now();
+    const reqPath = req.path;
+    let capturedJsonResponse: Record<string, any> | undefined = undefined;
+
+    if (shouldCaptureApiResponses) {
+      const originalResJson = res.json;
+      res.json = function (bodyJson, ...args) {
+        capturedJsonResponse = bodyJson;
+        return originalResJson.apply(res, [bodyJson, ...args]);
+      };
+    }
+
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      if (reqPath.startsWith("/api")) {
+        let logLine = `${req.method} ${reqPath} ${res.statusCode} in ${duration}ms`;
+        if (capturedJsonResponse) {
+          logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        }
+        log(logLine);
+      }
+    });
+
+    next();
+  });
+
+  // Runtime schema init is useful in development, but expensive on serverless cold starts.
+  if (shouldInitializeRuntimeSchemas) {
+    await initializeSchemas();
+  }
+
+  // Setup Supabase auth
+  const { setupSupabaseAuth } = await import("./auth/supabaseAuth.js");
+  await setupSupabaseAuth(app);
+
+  const httpServer = createServer(app);
+  await registerRoutes(httpServer, app);
+
+  // Error handling middleware
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
+    console.error("[express:error]", err);
+  });
+
+  return { app, httpServer };
+}
