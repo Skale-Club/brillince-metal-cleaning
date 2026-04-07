@@ -25,6 +25,18 @@ if (!rawDatabaseUrl) {
   );
 }
 
+const hasPlaceholderPassword = rawDatabaseUrl.includes("[YOUR-PASSWORD]");
+if (hasPlaceholderPassword && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "Database URL still contains [YOUR-PASSWORD]. Replace it before starting in production.",
+  );
+}
+if (hasPlaceholderPassword && process.env.NODE_ENV !== "production") {
+  console.warn(
+    "[db] Placeholder password detected in DATABASE_URL. Dev server can start, but database features will fail until .env is updated."
+  );
+}
+
 const isServerless = !!process.env.VERCEL;
 const sslExplicitlyDisabled =
   rawDatabaseUrl.includes('sslmode=disable') ||

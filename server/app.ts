@@ -10,6 +10,13 @@ const shouldCaptureApiResponses =
 const shouldInitializeRuntimeSchemas =
   process.env.ENABLE_RUNTIME_SCHEMA_INIT === "true" ||
   !(process.env.NODE_ENV === "production" && process.env.VERCEL);
+const hasPlaceholderPassword = [
+  process.env.SUPABASE_DATABASE_URL,
+  process.env.DATABASE_URL,
+  process.env.POSTGRES_URL,
+]
+  .filter((value): value is string => typeof value === "string")
+  .some((value) => value.includes("[YOUR-PASSWORD]"));
 
 declare module "http" {
   interface IncomingMessage {
@@ -76,12 +83,24 @@ export async function createApp(): Promise<{ app: express.Express; httpServer: S
 
   // Runtime schema init is useful in development, but expensive on serverless cold starts.
   if (shouldInitializeRuntimeSchemas) {
-    await initializeSchemas();
+    if (hasPlaceholderPassword) {
+      console.warn(
+        "[app] Skipping runtime schema init because DATABASE_URL still has placeholder password."
+      );
+    } else {
+      await initializeSchemas();
+    }
   }
 
   // Setup Supabase auth
-  const { setupSupabaseAuth } = await import("./auth/supabaseAuth.js");
-  await setupSupabaseAuth(app);
+  if (hasPlaceholderPassword) {
+    console.warn(
+      "[app] Skipping Supabase auth/session setup until real database credentials are configured."
+    );
+  } else {
+    const { setupSupabaseAuth } = await import("./auth/supabaseAuth.js");
+    await setupSupabaseAuth(app);
+  }
 
   const httpServer = createServer(app);
   await registerRoutes(httpServer, app);

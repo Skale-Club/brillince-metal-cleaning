@@ -11,6 +11,34 @@ import { getRequestOrigin, getRequestPath, injectSeoIntoHtml, type PageSeoData }
 const viteLogger = createLogger();
 
 export async function setupVite(server: Server, app: Express) {
+  const fallbackSeoSettings = {
+    seoTitle: "",
+    seoDescription: "",
+    ogImage: "",
+    seoKeywords: "",
+    seoAuthor: "",
+    seoCanonicalUrl: "",
+    seoRobotsTag: "",
+    ogType: "website",
+    ogSiteName: "Brilliance Metal Cleaning",
+    twitterCard: "summary_large_image",
+    twitterSite: "",
+    twitterCreator: "",
+    companyName: "Brilliance Metal Cleaning",
+    facebookAppId: "",
+    logoIcon: "",
+    schemaLocalBusiness: null,
+  };
+
+  const isDbCredentialIssue = (err: unknown): boolean => {
+    const msg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+    return (
+      msg.includes("tenant or user not found") ||
+      msg.includes("password authentication failed") ||
+      msg.includes("database url still contains [your-password]")
+    );
+  };
+
   const serverOptions = {
     middlewareMode: true,
     hmr: { server, path: "/vite-hmr" },
@@ -86,7 +114,16 @@ export async function setupVite(server: Server, app: Express) {
         }
       }
 
-      const settings = await storage.getCompanySettings();
+      let settings = fallbackSeoSettings as any;
+      try {
+        settings = await storage.getCompanySettings();
+      } catch (err) {
+        if (process.env.NODE_ENV !== "production" && isDbCredentialIssue(err)) {
+          console.warn("[vite] Using fallback SEO settings while database credentials are not configured.");
+        } else {
+          throw err;
+        }
+      }
       template = injectSeoIntoHtml(template, settings, {
         requestOrigin: getRequestOrigin(req),
         requestPath,

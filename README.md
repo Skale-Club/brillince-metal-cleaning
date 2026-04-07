@@ -55,7 +55,7 @@ Create a `.env` file in the project root.
 ### Required
 
 ```env
-DATABASE_URL=postgresql://user:password@host:port/database
+DATABASE_URL=postgresql://postgres.<project-ref>:<password>@aws-0-us-east-1.pooler.supabase.com:6543/postgres
 SESSION_SECRET=replace-with-a-strong-random-secret
 ADMIN_EMAIL=admin@yourdomain.com
 SUPABASE_URL=https://your-project.supabase.co

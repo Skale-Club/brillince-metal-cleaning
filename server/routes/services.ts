@@ -39,6 +39,35 @@ async function getUniqueServicePostSlug(baseValue: string, currentPostId?: numbe
  * Register service posts, gallery, company settings, and SEO routes
  */
 export function registerServiceRoutes(app: Express, requireAdmin: any) {
+  const hasPlaceholderDbPassword = [
+    process.env.SUPABASE_DATABASE_URL,
+    process.env.DATABASE_URL,
+    process.env.POSTGRES_URL,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .some((value) => value.includes("[YOUR-PASSWORD]"));
+
+  const isDbCredentialIssue = (err: unknown): boolean => {
+    const msg = safeErrorMessage(err, "").toLowerCase();
+    return (
+      msg.includes("tenant or user not found") ||
+      msg.includes("password authentication failed") ||
+      msg.includes("database url still contains [your-password]")
+    );
+  };
+
+  const fallbackCompanySettings = {
+    companyName: "Brilliance Metal Cleaning",
+    websitePrimaryColor: "#1C53A3",
+    websiteSecondaryColor: "#FFFF01",
+    websiteAccentColor: "#FFFF01",
+    websiteBackgroundColor: "#FFFFFF",
+    websiteForegroundColor: "#1D1D1D",
+    websiteNavBackgroundColor: "#1C1E24",
+    websiteFooterBackgroundColor: "#18191F",
+    websiteCtaBackgroundColor: "#406EF1",
+    websiteCtaHoverColor: "#355CD0",
+  };
   
   // ===============================
   // Service Posts Routes
@@ -248,11 +277,16 @@ export function registerServiceRoutes(app: Express, requireAdmin: any) {
 
   app.get('/api/company-settings', async (req, res) => {
     try {
-      queueAbandonedLeadNotificationSweep();
+      if (!hasPlaceholderDbPassword) {
+        queueAbandonedLeadNotificationSweep();
+      }
       applyPublicCache(res, { edgeMaxAge: 300 });
       const settings = await storage.getCompanySettings();
       res.json(settings);
     } catch (err) {
+      if (process.env.NODE_ENV !== "production" && isDbCredentialIssue(err)) {
+        return res.json(fallbackCompanySettings);
+      }
       res.status(500).json({ message: safeErrorMessage(err, 'Internal server error') });
     }
   });
