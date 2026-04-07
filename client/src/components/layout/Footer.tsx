@@ -179,13 +179,13 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
                 <img
                   src={companySettings.logoDark}
                   alt={companyName}
-                  className="h-16 w-auto object-contain p-1"
+                  className="h-20 w-auto object-contain p-1"
                 />
               ) : companySettings?.logoIcon ? (
                 <img
                   src={companySettings.logoIcon}
                   alt={companyName}
-                  className="h-16 w-auto object-contain p-1 brightness-0 invert"
+                  className="h-20 w-auto object-contain p-1 brightness-0 invert"
                 />
               ) : (
                 companyName ? <span className="text-white font-semibold">{companyName}</span> : null

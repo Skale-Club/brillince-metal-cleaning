@@ -74,8 +74,8 @@ const DEFAULT_WEBSITE_COLORS = {
   websiteAccentColor: "#FFFF01",
   websiteBackgroundColor: "#FFFFFF",
   websiteForegroundColor: "#1D1D1D",
-  websiteNavBackgroundColor: "#1C1E24",
-  websiteFooterBackgroundColor: "#18191F",
+  websiteNavBackgroundColor: "#0A0A0A",
+  websiteFooterBackgroundColor: "#0A0A0A",
   websiteCtaBackgroundColor: "#406EF1",
   websiteCtaHoverColor: "#355CD0",
 } as const;

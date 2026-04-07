@@ -243,7 +243,6 @@ export function DashboardSection({ onNavigate }: { onNavigate: (section: AdminSe
     { label: 'Total Leads', value: String(leadList.length), helper: `${hotLeads} hot leads`, icon: Users, color: 'text-blue-500' },
     { label: 'Leads (7 days)', value: String(leads7d), helper: `${leadsToday} today`, icon: Sparkles, color: 'text-violet-500' },
     { label: 'Conversion Rate', value: `${conversionRate.toFixed(1)}%`, helper: `${convertedLeads} converted`, icon: Target, color: 'text-emerald-500' },
-    { label: 'Open Chats', value: String(openConversations), helper: `${conversations?.length || 0} total threads`, icon: MessageSquare, color: 'text-amber-500' },
     { label: 'Published Posts', value: String(publishedPosts?.length || 0), helper: 'Public blog content', icon: FileText, color: 'text-fuchsia-500' },
   ];
 

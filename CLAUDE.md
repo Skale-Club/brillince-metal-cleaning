@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev          # Start development server (port 5000)
+npm run dev          # Start development server (port 8113)
 npm run build        # Build client (Vite) and server (esbuild) to /dist
 npm run start        # Run production server
 npm run check        # TypeScript type checking

@@ -57,16 +57,16 @@ export function Navbar() {
       style={{ backgroundColor: "var(--website-nav-bg)" }}
     >
       <div className="container-custom mx-auto">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 min-h-[40px] min-w-[40px]">
             {settingsLoading ? (
-              <div className="h-14 w-24 bg-white/10 rounded-md animate-pulse" />
+              <div className="h-20 w-32 bg-white/10 rounded-md animate-pulse" />
             ) : companySettings?.logoMain ? (
               <img
                 src={companySettings.logoMain}
                 alt={companySettings.companyName || ''}
-                className="h-14 w-auto object-contain p-1"
+                className="h-20 w-auto object-contain p-1"
               />
             ) : (
               companySettings?.companyName ? (

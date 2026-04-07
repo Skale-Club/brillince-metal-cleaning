@@ -50,7 +50,7 @@ function ensureTrailingSlash(url: string): string {
 }
 
 function normalizeBaseUrl(raw: string | null | undefined, req: Request): string {
-  const host = req.get("host") || req.hostname || "localhost:5000";
+  const host = req.get("host") || req.hostname || "localhost:8113";
   const fallback = `${req.protocol}://${host}`;
 
   if (!raw || !raw.trim()) {

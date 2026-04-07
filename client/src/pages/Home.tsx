@@ -330,10 +330,10 @@ export default function Home() {
   return (
     <div className="pb-0">
       {/* Hero Section */}
-      <section className="relative flex items-center justify-center overflow-hidden bg-[#1C53A3] min-h-[65vh] sm:min-h-[50vh] lg:min-h-[500px] xl:min-h-[550px] py-16 sm:py-20">
-        <div className={`container-custom mx-auto relative z-10 w-full py-8 ${trustBadges.length > 0 ? 'translate-y-4 sm:translate-y-2 lg:translate-y-0' : 'translate-y-8'}`}>
-          <div className={hasHeroImage ? "grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-6 lg:gap-8 items-center lg:items-center" : "grid grid-cols-1 place-items-center"}>
-            <div className={hasHeroImage ? "order-1 lg:order-2 text-white relative z-20" : "order-1 text-white relative z-20 w-full max-w-4xl text-center"}>
+      <section className="relative flex items-stretch justify-center overflow-hidden bg-[#1C53A3] min-h-[80vh] sm:min-h-[70vh] lg:min-h-[640px] xl:min-h-[700px] pt-16 sm:pt-20 pb-0">
+        <div className={`container-custom mx-auto relative z-10 w-full flex ${trustBadges.length > 0 ? '' : 'py-8'}`}>
+          <div className={hasHeroImage ? "grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-6 lg:gap-8 items-stretch w-full" : "grid grid-cols-1 place-items-center w-full"}>
+            <div className={hasHeroImage ? "order-1 lg:order-2 text-white relative z-20 flex flex-col justify-center pb-12 lg:pb-24" : "order-1 text-white relative z-20 w-full max-w-4xl text-center"}>
               {homepageContent.heroBadgeImageUrl ? (
                 <div className={hasHeroImage ? "mt-4 sm:mt-0 mb-3 lg:mb-6" : "mt-4 sm:mt-0 mb-3 lg:mb-6 flex justify-center"}>
                   <img
@@ -343,7 +343,7 @@ export default function Home() {
                   />
                 </div>
               ) : null}
-              <h1 className="text-6xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-3 lg:mb-6 font-display leading-[0.95] sm:leading-[1.0] lg:leading-[1.05]">
+              <h1 className="text-5xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 lg:mb-6 font-display leading-[1.05] sm:leading-[1.05] lg:leading-[1.1]">
                 {companySettings?.heroTitle ? (
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">{companySettings.heroTitle}</span>
                 ) : null}
@@ -372,7 +372,7 @@ export default function Home() {
                 <img
                   src={heroImageUrl}
                   alt={companySettings?.companyName || ""}
-                  className="w-[92vw] sm:w-[98%] lg:w-full max-w-[380px] sm:max-w-[360px] md:max-w-[430px] lg:max-w-[500px] xl:max-w-[560px] object-contain drop-shadow-2xl -translate-y-[2%] sm:-translate-y-[1%] lg:translate-y-[0%] scale-100 sm:scale-100 lg:scale-98 origin-bottom"
+                  className="w-[70vw] sm:w-[75%] lg:w-full max-w-[280px] sm:max-w-[280px] md:max-w-[320px] lg:max-w-[360px] xl:max-w-[400px] max-h-[60vh] lg:max-h-[600px] object-contain object-bottom drop-shadow-2xl origin-bottom"
                 />
               </div>
             ) : null}

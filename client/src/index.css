@@ -58,8 +58,8 @@
   --warning-foreground: 0 0% 11%;
 
   /* Website-specific custom colors */
-  --website-nav-bg: #1c1e24;
-  --website-footer-bg: #18191f;
+  --website-nav-bg: #0A0A0A;
+  --website-footer-bg: #0A0A0A;
   --website-cta-bg: #406ef1;
   --website-cta-hover: #355cd0;
 }
@@ -124,8 +124,8 @@
   --warning-foreground: 0 0% 11%;
 
   /* Website stays visually consistent even when admin is dark */
-  --website-nav-bg: #1c1e24;
-  --website-footer-bg: #18191f;
+  --website-nav-bg: #0A0A0A;
+  --website-footer-bg: #0A0A0A;
   --website-cta-bg: #406ef1;
   --website-cta-hover: #355cd0;
 }

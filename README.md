@@ -69,7 +69,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 POSTGRES_URL=postgresql://...               # fallback connection var
 SUPABASE_DATABASE_URL=postgresql://...      # optional DB fallback
 OPENAI_API_KEY=...                          # AI/chat features
-PORT=5000                                   # custom server port
+PORT=8113                                   # custom server port
 NODE_ENV=development
 ```
 
@@ -81,7 +81,7 @@ npm run db:push
 npm run dev
 ```
 
-The app runs at `http://localhost:5000` by default.
+The app runs at `http://localhost:8113` by default.
 
 ## Available Scripts
 
