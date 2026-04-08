@@ -791,6 +791,17 @@ export function HeroSettingsSection() {
                   <Plus className="w-6 h-6 text-white" />
                 </label>
               </div>
+              {homepageContent.heroBadgeImageUrl && (
+                <button
+                  type="button"
+                  className="w-[100px] text-[11px] text-destructive hover:underline flex items-center justify-center gap-1 mt-1"
+                  onClick={() =>
+                    updateHomepageContent(prev => ({ ...prev, heroBadgeImageUrl: '' }), 'homepageContent.heroBadgeImageUrl')
+                  }
+                >
+                  <Trash2 className="w-3 h-3" /> Remove
+                </button>
+              )}
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-2">

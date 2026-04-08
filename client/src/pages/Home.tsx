@@ -14,6 +14,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { getServicePostPath } from "@/lib/service-path";
 import { FaqSection } from "@/components/FaqSection";
+import sunriseHero from "@/assets/sunrise-hero.png";
 
 type FallbackReview = {
   id: number;
@@ -385,21 +386,7 @@ export default function Home() {
           style={{
             background: heroBackgroundImageUrl
               ? `linear-gradient(to right bottom, rgba(0, 0, 0, 0.6), rgba(20, 20, 30, 0.7)), url(${heroBackgroundImageUrl}) center/cover no-repeat`
-              : `linear-gradient(
-                to right bottom,
-                #09152d,
-                #0b152a,
-                #0d1427,
-                #0f1424,
-                #101421,
-                #121622,
-                #151723,
-                #171924,
-                #1c1c29,
-                #21202e,
-                #262332,
-                #2c2637
-              )`
+              : `linear-gradient(to right bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${sunriseHero}) center/cover no-repeat`
           }}
         ></div>
       </section>
@@ -431,14 +418,12 @@ export default function Home() {
       <ServicesCarouselSection posts={servicePostsList} />
       <GalleryShowcaseSection images={galleryPreview || []} />
       <BlogSection content={homepageContent.blogSection} />
-      {(companySettings?.aboutImageUrl || homepageContent.aboutSection?.description || (homepageContent.aboutSection?.highlights && homepageContent.aboutSection.highlights.length > 0)) && (
       <section id="about" className="bg-[#F8FAFC] py-20">
         <AboutSection
           aboutImageUrl={companySettings?.aboutImageUrl}
           content={homepageContent.aboutSection}
         />
       </section>
-      )}
       {/* Reviews Section */}
       {(reviewsUseWidget || (reviewsUseFallback && fallbackReviews.length > 0) || reviewsTitle || reviewsSubtitle) && (
       <section className="pt-6 sm:pt-10 lg:pt-12 pb-0 bg-white mb-0 text-slate-800">
