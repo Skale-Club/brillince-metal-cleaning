@@ -35,8 +35,8 @@ const DEFAULT_HIGHLIGHTS = [
 ];
 
 const STATS = [
-  { value: "5★", label: "Top-Rated Service" },
-  { value: "#1", label: "Metal Specialists" },
+  { value: "10+", label: "Years in Business" },
+  { value: "500+", label: "Jobs Completed" },
   { value: "100%", label: "Satisfaction Rate" },
   { value: "24h", label: "Avg. Turnaround" },
 ];
@@ -60,7 +60,7 @@ export function AboutSection({ content, aboutImageUrl }: AboutSectionProps) {
   return (
     <div className="container-custom mx-auto">
       {/* ── TOP ROW: image + text ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-start">
 
         {/* IMAGE COLUMN */}
         <div className="order-1 relative">
@@ -79,7 +79,7 @@ export function AboutSection({ content, aboutImageUrl }: AboutSectionProps) {
 
         {/* TEXT COLUMN */}
         <div className="order-2 pb-8 lg:pb-0 flex flex-col justify-center">
-          <div className="inline-flex self-start items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
             <Sparkles className="w-4 h-4" />
             {label}
           </div>
@@ -92,12 +92,12 @@ export function AboutSection({ content, aboutImageUrl }: AboutSectionProps) {
             {description}
           </p>
 
-          {/* Stats */}
-          <div className="mt-8 grid grid-cols-4 gap-4">
+          {/* Stats card — below description */}
+          <div className="mt-8 bg-white rounded-2xl shadow-xl p-4 sm:p-6 grid grid-cols-4 gap-x-4 gap-y-3 border border-slate-100">
             {STATS.map((stat) => (
               <div key={stat.label} className="text-center">
-                <p className="text-2xl sm:text-3xl font-bold text-primary leading-none">{stat.value}</p>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-tight">{stat.label}</p>
+                <p className="text-xl sm:text-2xl font-bold text-primary leading-none">{stat.value}</p>
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-tight">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -111,7 +111,7 @@ export function AboutSection({ content, aboutImageUrl }: AboutSectionProps) {
           return (
             <div
               key={index}
-              className="flex flex-col gap-3 p-5 bg-white/70 rounded-xl border border-[#E5D9C3] hover:border-primary/20 hover:bg-white/90 transition-colors group"
+              className="flex flex-col gap-3 p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-primary/20 hover:bg-primary/5 transition-colors group"
             >
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
                 <Icon className="w-5 h-5 text-primary" />
