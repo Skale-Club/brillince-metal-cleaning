@@ -6,22 +6,37 @@ on:
     - cron: "17 */6 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
 jobs:
   keepalive:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Resolve database URL secret
         shell: bash
+        env:
+          SECRET_SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          SECRET_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+          SECRET_POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+          SECRET_POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          SECRET_SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          DB_URL="${{ secrets.SUPABASE_DATABASE_URL }}"
-          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.DATABASE_URL }}"; fi
-          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.POSTGRES_URL }}"; fi
-          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.POSTGRES_URL_NON_POOLING }}"; fi
-          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.POSTGRES_PRISMA_URL }}"; fi
-          if [ -z "${DB_URL}" ]; then DB_URL="${{ secrets.SUPABASE_DB_URL }}"; fi
+          DB_URL="${SECRET_SUPABASE_DATABASE_URL}"
+          if [ -z "${DB_URL}" ]; then DB_URL="${SECRET_DATABASE_URL}"; fi
+          if [ -z "${DB_URL}" ]; then DB_URL="${SECRET_POSTGRES_URL}"; fi
+          if [ -z "${DB_URL}" ]; then DB_URL="${SECRET_POSTGRES_URL_NON_POOLING}"; fi
+          if [ -z "${DB_URL}" ]; then DB_URL="${SECRET_POSTGRES_PRISMA_URL}"; fi
+          if [ -z "${DB_URL}" ]; then DB_URL="${SECRET_SUPABASE_DB_URL}"; fi
 
           if [ -z "${DB_URL}" ]; then
             echo "::error title=Missing DB URL secret::Set one of these GitHub Actions secrets: SUPABASE_DATABASE_URL, DATABASE_URL, POSTGRES_URL, POSTGRES_URL_NON_POOLING, POSTGRES_PRISMA_URL, SUPABASE_DB_URL."
@@ -44,7 +59,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Write heartbeat timestamp in Supabase
-        run: npx tsx scripts/supabase-keepalive.ts
+        run: npm run supabase:keepalive
