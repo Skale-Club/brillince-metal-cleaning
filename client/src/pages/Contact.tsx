@@ -64,7 +64,7 @@ export default function Contact() {
 
   if (isSubmitted) {
     return (
-      <div className="pt-24 pb-20">
+      <div className="pt-8 pb-20">
         <div className="container-custom mx-auto">
           <div className="max-w-3xl mb-16">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">Thank You!</h1>
@@ -81,7 +81,7 @@ export default function Contact() {
   }
 
   return (
-    <div className="pt-24 pb-20">
+    <div className="pt-8 pb-20">
       <div className="container-custom mx-auto">
         <div className="max-w-3xl mb-16">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">Contact Us</h1>
@@ -158,34 +158,33 @@ export default function Contact() {
           </div>
 
           <div className="space-y-8">
-            <div className="p-8 bg-blue-50 rounded-3xl border border-blue-100">
+            <div className="website-cta-panel rounded-3xl border p-8">
               <h3 className="text-xl font-bold mb-6">Get in Touch</h3>
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    <Phone className="w-5 h-5 text-blue-600" />
+                  <div className="website-cta-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-full border">
+                    <Phone className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="font-medium">Call Us</p>
-                    <p className="text-slate-600">{phone || "Contact us for phone"}</p>
+                    {phone ? (
+                      <a href={`tel:+1${phone.replace(/\D/g, '')}`} className="text-slate-600 hover:text-primary transition-colors">{phone}</a>
+                    ) : (
+                      <p className="text-slate-600">Contact us for phone</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    <Mail className="w-5 h-5 text-blue-600" />
+                  <div className="website-cta-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-full border">
+                    <Mail className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="font-medium">Email Us</p>
-                    <p className="text-slate-600">{email || "Contact us for email"}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    <MapPin className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Visit Us</p>
-                    <p className="text-slate-600">{address || "Contact us for address"}</p>
+                    {email ? (
+                      <a href={`mailto:${email}`} className="text-slate-600 hover:text-primary transition-colors">{email}</a>
+                    ) : (
+                      <p className="text-slate-600">Contact us for email</p>
+                    )}
                   </div>
                 </div>
               </div>

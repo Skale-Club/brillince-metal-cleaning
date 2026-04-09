@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-        <div className="bg-primary text-white pt-28 pb-16">
+        <div className="bg-[#2A2A2A] text-white pt-8 pb-16">
           <div className="container-custom">
             <Skeleton className="h-10 w-64 bg-white/20 mb-4" />
             <Skeleton className="h-6 w-96 bg-white/20" />
@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-28">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-8">
         <div className="container-custom py-12">
           <ErrorState
             title="Failed to load Privacy Policy"
@@ -53,7 +53,7 @@ export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
-      <div className="bg-primary text-white pt-28 pb-16">
+      <div className="bg-[#2A2A2A] text-white pt-8 pb-16">
         <div className="container-custom">
           <div className="flex items-center gap-3 mb-4">
             <Shield className="w-10 h-10" />

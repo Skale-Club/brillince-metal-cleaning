@@ -172,34 +172,27 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </div>
           </div>
         ) : (
-        <div className="grid gap-10 md:grid-cols-12">
-          <div className="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left space-y-6">
-            <Link href="/" className="flex items-center gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+
+          {/* Col 1 — Brand */}
+          <div className="flex flex-col gap-6">
+            <Link href="/" className="inline-flex">
               {companySettings?.logoDark ? (
-                <img
-                  src={companySettings.logoDark}
-                  alt={companyName}
-                  className="h-20 w-auto object-contain p-1"
-                />
+                <img src={companySettings.logoDark} alt={companyName} className="h-16 w-auto object-contain" />
               ) : companySettings?.logoIcon ? (
-                <img
-                  src={companySettings.logoIcon}
-                  alt={companyName}
-                  className="h-20 w-auto object-contain p-1 brightness-0 invert"
-                />
+                <img src={companySettings.logoIcon} alt={companyName} className="h-16 w-auto object-contain brightness-0 invert" />
               ) : (
-                companyName ? <span className="text-white font-semibold">{companyName}</span> : null
+                companyName ? <span className="text-white font-bold text-xl">{companyName}</span> : null
               )}
             </Link>
+
             {tagline ? (
-              <p className="text-gray-400 max-w-md text-sm leading-relaxed">
-                {tagline}
-              </p>
+              <p className="text-gray-400 text-sm leading-relaxed">{tagline}</p>
             ) : null}
 
-            {companySettings && (companySettings as any).socialLinks && Array.isArray((companySettings as any).socialLinks) && (companySettings as any).socialLinks.length > 0 && (
-              <div className="flex gap-4">
-                {((companySettings as any).socialLinks as { platform: string, url: string }[]).map((link, i) => {
+            {companySettings && Array.isArray((companySettings as any).socialLinks) && (companySettings as any).socialLinks.length > 0 && (
+              <div className="flex gap-3">
+                {((companySettings as any).socialLinks as { platform: string; url: string }[]).map((link, i) => {
                   const Icon = platformIcons[link.platform.toLowerCase()] || SiFacebook;
                   return (
                     <a
@@ -207,9 +200,9 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-400 hover:text-gray-200 transition-colors"
+                      className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-white/30 transition-all"
                     >
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-4 h-4" />
                     </a>
                   );
                 })}
@@ -217,22 +210,24 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             )}
           </div>
 
+          {/* Col 2 — Services */}
           {servicePosts.length > 0 ? (
-            <div className="md:col-span-8">
-              <div className="sm:hidden space-y-4">
-                {serviceGroups.map(renderServiceGroup)}
-              </div>
-
-              <div className="hidden sm:grid sm:[grid-template-columns:auto_auto] sm:gap-x-4 sm:gap-y-4 sm:justify-start">
-                <div className="space-y-4 max-w-[360px]">
-                  {leftColumnGroups.map(renderServiceGroup)}
-                </div>
-                <div className="space-y-4 max-w-[360px]">
-                  {rightColumnGroups.map(renderServiceGroup)}
-                </div>
+            <div className="flex flex-col gap-5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Our Services</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                {servicePosts.map((post) => (
+                  <Link
+                    key={post.id}
+                    href={getServicePostPath(post.id, post.slug)}
+                    className="text-gray-400 hover:text-gray-200 transition-colors text-sm font-medium leading-snug"
+                  >
+                    {post.title}
+                  </Link>
+                ))}
               </div>
             </div>
           ) : null}
+
         </div>
         )}
       </div>
@@ -245,6 +240,17 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             <Link href="/terms-of-service" className="text-gray-400 hover:text-gray-200 transition-colors">Terms of Service</Link>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6 h-10 mb-14 flex items-center justify-center" style={{ backgroundColor: "#111111" }}>
+        <a
+          href="https://skale.club"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          Developed by Skale Club
+        </a>
       </div>
     </footer>
   );

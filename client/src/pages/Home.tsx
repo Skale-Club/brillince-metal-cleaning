@@ -120,11 +120,11 @@ function BlogSection({ content }: { content: HomepageContent['blogSection'] }) {
                           />
                         </div>
                       ) : (
-                        <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                          <FileText className="w-12 h-12 text-blue-300" />
+                        <div className="content-fallback aspect-video flex items-center justify-center">
+                          <FileText className="content-fallback-icon w-12 h-12" />
                         </div>
                       )}
-                      <div className="p-6 flex flex-col flex-1">
+                      <div className="content-card-surface flex flex-1 flex-col p-6">
                         <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
                           <Calendar className="w-4 h-4" />
                           <span data-testid={`text-blog-home-date-${post.id}`}>
@@ -134,7 +134,7 @@ function BlogSection({ content }: { content: HomepageContent['blogSection'] }) {
                         <h3 className="text-lg font-bold text-[#1D1D1D] mb-2 line-clamp-2 group-hover:text-primary transition-colors" data-testid={`text-blog-home-title-${post.id}`}>
                           {post.title}
                         </h3>
-                        <p className="text-slate-600 text-sm line-clamp-3 flex-1" data-testid={`text-blog-home-excerpt-${post.id}`}>
+                        <p className="content-card-copy text-sm line-clamp-3 flex-1" data-testid={`text-blog-home-excerpt-${post.id}`}>
                           {getExcerpt(post)}
                         </p>
                         <div className="mt-4 pt-4 border-t border-gray-100">
@@ -199,11 +199,11 @@ function BlogSection({ content }: { content: HomepageContent['blogSection'] }) {
                     />
                   </div>
                 ) : (
-                  <div className="aspect-video bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                    <FileText className="w-12 h-12 text-blue-300" />
+                  <div className="content-fallback aspect-video flex items-center justify-center">
+                    <FileText className="content-fallback-icon w-12 h-12" />
                   </div>
                 )}
-                <div className="p-6 flex flex-col flex-1">
+                <div className="content-card-surface flex flex-1 flex-col p-6">
                   <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
                     <Calendar className="w-4 h-4" />
                     <span data-testid={`text-blog-home-date-${post.id}`}>
@@ -213,7 +213,7 @@ function BlogSection({ content }: { content: HomepageContent['blogSection'] }) {
                   <h3 className="text-lg font-bold text-[#1D1D1D] mb-2 line-clamp-2 group-hover:text-primary transition-colors" data-testid={`text-blog-home-title-${post.id}`}>
                     {post.title}
                   </h3>
-                  <p className="text-slate-600 text-sm line-clamp-3 flex-1" data-testid={`text-blog-home-excerpt-${post.id}`}>
+                  <p className="content-card-copy text-sm line-clamp-3 flex-1" data-testid={`text-blog-home-excerpt-${post.id}`}>
                     {getExcerpt(post)}
                   </p>
                   <div className="mt-4 pt-4 border-t border-gray-100">
@@ -229,7 +229,7 @@ function BlogSection({ content }: { content: HomepageContent['blogSection'] }) {
         </div>
 
         <div className="mt-10 text-center md:hidden">
-          <Link href="/blog" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition-colors" data-testid="link-view-all-blog-mobile">
+          <Link href="/blog" className="website-cta rounded-full px-6 py-3 font-bold" data-testid="link-view-all-blog-mobile">
             {sectionContent.viewAllText}
             <ArrowRight className="w-4 h-4" />
           </Link>
@@ -259,7 +259,9 @@ export default function Home() {
   const homepageContent: Partial<HomepageContent> = companySettings?.homepageContent || {};
   const areasServedSection: HomepageContent["areasServedSection"] = {
     ...DEFAULT_HOMEPAGE_CONTENT.areasServedSection,
-    ...(homepageContent.areasServedSection || {}),
+    ...Object.fromEntries(
+      Object.entries(homepageContent.areasServedSection || {}).filter(([, v]) => v !== '' && v != null)
+    ),
   };
 
   const trustBadges = homepageContent.trustBadges || [];
@@ -331,10 +333,10 @@ export default function Home() {
   return (
     <div className="pb-0">
       {/* Hero Section */}
-      <section className="relative flex items-stretch justify-center overflow-hidden bg-[#1C53A3] min-h-[80vh] sm:min-h-[70vh] lg:min-h-[640px] xl:min-h-[700px] pt-16 sm:pt-20 pb-0">
+      <section className="relative flex items-stretch justify-center overflow-hidden bg-[#1C53A3] min-h-[80vh] sm:min-h-[70vh] lg:min-h-[480px] xl:min-h-[525px] pt-12 pb-0 lg:py-16">
         <div className={`container-custom mx-auto relative z-10 w-full flex ${trustBadges.length > 0 ? '' : 'py-8'}`}>
           <div className={hasHeroImage ? "grid grid-cols-1 lg:grid-cols-2 gap-1 sm:gap-6 lg:gap-8 items-stretch w-full" : "grid grid-cols-1 place-items-center w-full"}>
-            <div className={hasHeroImage ? "order-1 lg:order-2 text-white relative z-20 flex flex-col justify-center pb-12 lg:pb-24" : "order-1 text-white relative z-20 w-full max-w-4xl text-center"}>
+            <div className={hasHeroImage ? "order-1 lg:order-2 text-white relative z-20 flex flex-col justify-center pb-4 lg:pb-24" : "order-1 text-white relative z-20 w-full max-w-4xl text-center"}>
               {homepageContent.heroBadgeImageUrl ? (
                 <div className={hasHeroImage ? "mt-4 sm:mt-0 mb-3 lg:mb-6" : "mt-4 sm:mt-0 mb-3 lg:mb-6 flex justify-center"}>
                   <img
@@ -344,9 +346,13 @@ export default function Home() {
                   />
                 </div>
               ) : null}
-              <h1 className="text-5xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 lg:mb-6 font-display leading-[1.05] sm:leading-[1.05] lg:leading-[1.1]">
+              <h1 className="text-5xl sm:text-[3.9rem] md:text-[3.9rem] lg:text-6xl xl:text-7xl font-bold mb-3 lg:mb-6 font-display leading-[1.05] sm:leading-[1.05] lg:leading-[1.1]">
                 {companySettings?.heroTitle ? (
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">{companySettings.heroTitle}</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">
+                    {companySettings.heroTitle.split('. ').map((part, i, arr) => (
+                      <span key={i}>{part}{i < arr.length - 1 ? '.' : ''}{i < arr.length - 1 && <br />}</span>
+                    ))}
+                  </span>
                 ) : null}
               </h1>
               <p className={hasHeroImage ? "text-base sm:text-xl text-blue-50/80 mb-4 lg:mb-8 leading-relaxed max-w-xl" : "text-base sm:text-xl text-blue-50/80 mb-4 lg:mb-8 leading-relaxed max-w-xl mx-auto"}>
@@ -356,7 +362,7 @@ export default function Home() {
                 {companySettings?.ctaText ? (
                   <button
                     data-form-trigger="lead-form"
-                    className="w-full sm:w-auto shrink-0 px-6 sm:px-8 py-3 sm:py-4 bg-[#406EF1] hover:bg-[#355CD0] hover:scale-105 text-white font-bold rounded-full transition-all flex items-center justify-center gap-2 text-base sm:text-lg whitespace-nowrap"
+                    className="website-cta w-full shrink-0 rounded-full px-6 py-3 text-base font-bold hover:-translate-y-0.5 sm:w-[40%] sm:px-8 sm:py-4 sm:text-lg lg:w-auto"
                     onClick={() => {
                       setIsFormOpen(true);
                       trackCTAClick('hero', companySettings?.ctaText || '');
@@ -369,24 +375,36 @@ export default function Home() {
               </div>
             </div>
             {hasHeroImage ? (
-              <div className="order-2 lg:order-1 relative flex h-full items-end justify-center lg:justify-end self-end w-full lg:min-h-[400px] z-10 lg:ml-[-3%] mt-0 sm:mt-0 lg:-mt-10">
+              <div className="order-2 lg:order-1 relative flex h-full items-end justify-center lg:justify-end self-end w-full lg:min-h-[400px] z-10 lg:ml-[-3%] -mt-4 sm:-mt-2 lg:-mt-10">
                 <img
                   src={heroImageUrl}
                   alt={companySettings?.companyName || ""}
-                  className="w-[70vw] sm:w-[75%] lg:w-full max-w-[280px] sm:max-w-[280px] md:max-w-[320px] lg:max-w-[360px] xl:max-w-[400px] max-h-[60vh] lg:max-h-[600px] object-contain object-bottom drop-shadow-2xl origin-bottom"
+                  className="w-[88vw] sm:w-[75%] lg:w-full max-w-[360px] sm:max-w-[320px] md:max-w-[340px] lg:max-w-[360px] xl:max-w-[400px] max-h-[70vh] lg:max-h-[600px] object-contain object-bottom drop-shadow-2xl origin-bottom"
                 />
               </div>
             ) : null}
           </div>
         </div>
 
-        {/* Hero Background Gradient */}
+        {/* Hero Background Image */}
+        <div
+          className="absolute inset-0 hero-bg"
+          style={{
+            backgroundImage: heroBackgroundImageUrl
+              ? `url(${heroBackgroundImageUrl})`
+              : `url(${sunriseHero})`,
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+          }}
+        ></div>
+        {/* Hero Overlay */}
         <div
           className="absolute inset-0"
           style={{
             background: heroBackgroundImageUrl
-              ? `linear-gradient(to right bottom, rgba(0, 0, 0, 0.6), rgba(20, 20, 30, 0.7)), url(${heroBackgroundImageUrl}) center/cover no-repeat`
-              : `linear-gradient(to right bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${sunriseHero}) center/cover no-repeat`
+              ? 'linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, rgba(20, 20, 30, 0.65) 100%)'
+              : 'linear-gradient(to bottom, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.45) 100%)',
           }}
         ></div>
       </section>
@@ -400,7 +418,7 @@ export default function Home() {
               const Icon = badgeIconMap[iconKey] || badgeIconMap.star || Star;
               return (
                 <div key={i} className="p-8 flex items-center gap-6 hover:bg-gray-50 transition-colors">
-                  <div className="w-12 h-12 bg-blue-50 text-primary rounded-full flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 bg-[#F5E6C0] text-[#B8930A] rounded-full flex items-center justify-center shrink-0">
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
@@ -418,7 +436,7 @@ export default function Home() {
       <ServicesCarouselSection posts={servicePostsList} />
       <GalleryShowcaseSection images={galleryPreview || []} />
       <BlogSection content={homepageContent.blogSection} />
-      <section id="about" className="bg-[#F8FAFC] py-20">
+      <section id="about" className="bg-[#FAF6ED] py-20">
         <AboutSection
           aboutImageUrl={companySettings?.aboutImageUrl}
           content={homepageContent.aboutSection}
@@ -444,13 +462,13 @@ export default function Home() {
           ) : null}
           {reviewsUseWidget && reviewsEmbedUrl ? (
             <div className="w-full px-0">
-                <div className="pb-0 bg-[#F8FAFC] -mt-6 sm:-mt-8 lg:-mt-10">
+                <div className="pb-0 bg-[#FAF6ED] -mt-6 sm:-mt-8 lg:-mt-10">
                 <iframe 
                   className="lc_reviews_widget rounded-none" 
                   src={reviewsEmbedUrl}
                   frameBorder='0' 
                   scrolling='no' 
-                   style={{ minWidth: '100%', width: '100%', height: '488px', border: 'none', display: 'block', borderRadius: '0', background: '#F8FAFC' }}
+                   style={{ minWidth: '100%', width: '100%', height: '488px', border: 'none', display: 'block', borderRadius: '0', background: '#FAF6ED' }}
                   onLoad={() => {
                     const script = document.createElement('script');
                     script.type = 'text/javascript';
@@ -469,7 +487,7 @@ export default function Home() {
       )}
       <FaqSection maxItems={8} />
       {(companySettings?.mapEmbedUrl || homepageContent.areasServedSection?.heading || homepageContent.areasServedSection?.description) && (
-      <section id="areas-served" className="bg-[#F8FAFC] py-20">
+      <section id="areas-served" className="bg-white py-20">
         <AreasServedMap
           mapEmbedUrl={companySettings?.mapEmbedUrl}
           content={areasServedSection}
@@ -483,31 +501,33 @@ export default function Home() {
 
 function ServiceCard({ post }: { post: ServicePost }) {
   return (
-    <Link
-      href={getServicePostPath(post.id, post.slug)}
-      className="group block h-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
-      data-testid={`link-home-service-post-${post.id}`}
-    >
-      {post.featureImageUrl ? (
-        <img src={post.featureImageUrl} alt={post.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
-      ) : (
-        <div className="flex aspect-[4/3] items-center justify-center bg-slate-100">
-          <ImageIcon className="h-10 w-10 text-slate-400" />
+    <div className="group h-full p-[1px] rounded-2xl bg-gradient-to-br from-[#E8D9A8] via-[#F7EDCC] to-[#DECA95] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+      <Link
+        href={getServicePostPath(post.id, post.slug)}
+        className="block h-full overflow-hidden rounded-[14px] bg-white"
+        data-testid={`link-home-service-post-${post.id}`}
+      >
+        {post.featureImageUrl ? (
+          <img src={post.featureImageUrl} alt={post.title} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="flex aspect-[4/3] items-center justify-center bg-slate-100">
+            <ImageIcon className="h-10 w-10 text-slate-400" />
+          </div>
+        )}
+        <div className="space-y-3 p-5">
+          <h3 className="text-xl font-bold text-slate-900 group-hover:text-primary transition-colors">
+            {post.title}
+          </h3>
+          <p className="line-clamp-2 text-sm text-slate-600">
+            {post.excerpt || "Professional service tailored to your needs."}
+          </p>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
+            View service page
+            <ArrowRight className="h-4 w-4" />
+          </span>
         </div>
-      )}
-      <div className="space-y-3 p-5">
-        <h3 className="text-xl font-bold text-slate-900 group-hover:text-primary transition-colors">
-          {post.title}
-        </h3>
-        <p className="line-clamp-2 text-sm text-slate-600">
-          {post.excerpt || "Professional service tailored to your needs."}
-        </p>
-        <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
-          View service page
-          <ArrowRight className="h-4 w-4" />
-        </span>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
@@ -576,7 +596,7 @@ function ServicesCarouselSection({ posts }: { posts: ServicePost[] }) {
         )}
 
         <div className="mt-8 text-center md:hidden">
-          <Link href="/services" className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-bold text-white hover:bg-primary/90">
+          <Link href="/services" className="website-cta rounded-full px-6 py-3 font-bold">
             View all services
             <ArrowRight className="w-4 h-4" />
           </Link>
@@ -651,7 +671,7 @@ function ReviewsCarouselSection({ reviews }: { reviews: FallbackReview[] }) {
         >
           <CarouselContent>
             {safeReviews.map((review) => (
-              <CarouselItem key={review.id} className="pl-0 px-2 sm:px-3 lg:px-4 basis-full sm:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={review.id} className="pl-0 px-2 sm:px-3 lg:px-4 basis-full sm:basis-1/2 lg:basis-1/4">
                 <FallbackReviewCard review={review} />
               </CarouselItem>
             ))}
@@ -682,7 +702,7 @@ function GalleryShowcaseSection({ images }: { images: GalleryImage[] }) {
   if (!images.length) return null;
 
   return (
-    <section className="bg-[#F8FAFC] py-20">
+    <section className="bg-[#FAF6ED] py-20">
       <div className="container-custom mx-auto">
         <div className="mb-10 flex items-end justify-between gap-4">
           <div>
@@ -714,7 +734,7 @@ function GalleryShowcaseSection({ images }: { images: GalleryImage[] }) {
         </div>
 
         <div className="mt-8 text-center md:hidden">
-          <Link href="/gallery" className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-bold text-white hover:bg-primary/90">
+          <Link href="/gallery" className="website-cta rounded-full px-6 py-3 font-bold">
             View all photos
             <ArrowRight className="w-4 h-4" />
           </Link>

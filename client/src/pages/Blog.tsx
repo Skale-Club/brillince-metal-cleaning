@@ -62,7 +62,7 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-primary/5 pb-8 pt-24 md:pb-10 md:pt-24">
+      <div className="bg-primary/5 pb-8 pt-8 md:pb-10 md:pt-10">
         <div className="container-custom">
           <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4" data-testid="nav-blog-breadcrumb">
             <Link href="/" className="hover:text-primary">Home</Link>
@@ -100,7 +100,7 @@ export default function Blog() {
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="overflow-hidden border-0">
                 <Skeleton className="aspect-video" />
-                <CardContent className="p-4 space-y-3 bg-slate-50">
+                <CardContent className="content-card-surface space-y-3 p-4">
                   <Skeleton className="h-6 w-3/4" />
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-2/3" />
@@ -134,11 +134,11 @@ export default function Blog() {
                         />
                       </div>
                     ) : (
-                      <div className="aspect-video bg-muted flex items-center justify-center">
-                        <FileText className="w-12 h-12 text-muted-foreground" />
+                      <div className="content-fallback aspect-video flex items-center justify-center">
+                        <FileText className="content-fallback-icon w-12 h-12" />
                       </div>
                     )}
-                    <CardContent className="p-4 flex-1 flex flex-col bg-slate-50">
+                    <CardContent className="content-card-surface flex flex-1 flex-col p-4">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                         <Calendar className="w-4 h-4" />
                         <span data-testid={`text-blog-date-${post.id}`}>
@@ -152,7 +152,7 @@ export default function Blog() {
                         {post.title}
                       </h2>
                       <p 
-                        className="text-sm text-muted-foreground line-clamp-3 flex-1"
+                        className="content-card-copy text-sm line-clamp-3 flex-1"
                         data-testid={`text-blog-excerpt-${post.id}`}
                       >
                         {getExcerpt(post)}
@@ -172,7 +172,7 @@ export default function Blog() {
                 {[...Array(3)].map((_, i) => (
                   <Card key={`loading-more-${i}`} className="overflow-hidden border-0">
                     <Skeleton className="aspect-video" />
-                    <CardContent className="p-4 space-y-3 bg-slate-50">
+                    <CardContent className="content-card-surface space-y-3 p-4">
                       <Skeleton className="h-6 w-3/4" />
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-2/3" />

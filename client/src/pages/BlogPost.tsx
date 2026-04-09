@@ -111,7 +111,7 @@ export default function BlogPostPage() {
   return (
     <div className="min-h-screen bg-background">
       <article>
-        <div className="bg-primary/5 pt-32 pb-10">
+        <div className="bg-primary/5 pt-8 pb-10">
           <div className="container-custom">
             <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4" data-testid="nav-post-breadcrumb">
               <Link href="/" className="hover:text-primary">Home</Link>
@@ -239,8 +239,8 @@ export default function BlogPostPage() {
                                 loading="lazy"
                               />
                             ) : (
-                              <div className="w-16 h-12 bg-muted rounded flex items-center justify-center flex-shrink-0">
-                                <FileText className="w-4 h-4 text-muted-foreground" />
+                              <div className="content-fallback flex h-12 w-16 flex-shrink-0 items-center justify-center rounded">
+                                <FileText className="content-fallback-icon w-4 h-4" />
                               </div>
                             )}
                             <div className="flex-1 min-w-0">

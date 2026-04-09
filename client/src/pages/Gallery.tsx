@@ -84,7 +84,7 @@ export default function GalleryPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="bg-primary/5 pb-8 pt-24 md:pb-10 md:pt-24">
+      <section className="bg-primary/5 pb-8 pt-8 md:pb-10 md:pt-10">
         <div className="container-custom">
           <nav className="mb-4 flex items-center gap-2 text-sm text-muted-foreground" data-testid="nav-gallery-breadcrumb">
             <Link href="/" className="hover:text-primary">Home</Link>

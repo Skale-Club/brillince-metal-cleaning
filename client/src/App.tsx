@@ -124,6 +124,58 @@ function hexToHslToken(hex: string): string {
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
+function hexToRgbToken(hex: string): string {
+  const normalized = normalizeHexColor(hex, "#000000");
+  const r = parseInt(normalized.slice(1, 3), 16);
+  const g = parseInt(normalized.slice(3, 5), 16);
+  const b = parseInt(normalized.slice(5, 7), 16);
+
+  return `${r} ${g} ${b}`;
+}
+
+function hexToRgbChannels(hex: string): [number, number, number] {
+  const normalized = normalizeHexColor(hex, "#000000");
+  return [
+    parseInt(normalized.slice(1, 3), 16),
+    parseInt(normalized.slice(3, 5), 16),
+    parseInt(normalized.slice(5, 7), 16),
+  ];
+}
+
+function rgbChannelsToHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b]
+    .map((channel) => Math.max(0, Math.min(255, Math.round(channel))).toString(16).padStart(2, "0"))
+    .join("")}`.toUpperCase();
+}
+
+function getRelativeLuminance(hex: string): number {
+  const [r, g, b] = hexToRgbChannels(hex).map((channel) => {
+    const normalized = channel / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function darkenHex(hex: string, amount = 0.08): string {
+  const channels = hexToRgbChannels(hex).map((channel) => channel * (1 - amount)) as [number, number, number];
+  return rgbChannelsToHex(channels);
+}
+
+function getEffectiveCtaHoverColor(ctaBg: string, configuredHover: string): string {
+  const bgLuminance = getRelativeLuminance(ctaBg);
+  const hoverLuminance = getRelativeLuminance(configuredHover);
+  const hoverIsLighterThanBase = hoverLuminance > bgLuminance;
+
+  if (hoverIsLighterThanBase) {
+    return darkenHex(ctaBg, 0.07);
+  }
+
+  return configuredHover;
+}
+
 function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const { data: settings } = useQuery<CompanySettings>({
     queryKey: ['/api/company-settings'],
@@ -162,6 +214,10 @@ function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       root.style.removeProperty("--website-footer-bg");
       root.style.removeProperty("--website-cta-bg");
       root.style.removeProperty("--website-cta-hover");
+      root.style.removeProperty("--website-cta-hover-effective");
+      root.style.removeProperty("--website-cta-bg-rgb");
+      root.style.removeProperty("--website-cta-hover-rgb");
+      root.style.removeProperty("--website-cta-hover-effective-rgb");
       return;
     }
 
@@ -174,6 +230,7 @@ function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     const footerBg = normalizeHexColor(settings?.websiteFooterBackgroundColor, DEFAULT_WEBSITE_COLORS.websiteFooterBackgroundColor);
     const ctaBg = normalizeHexColor(settings?.websiteCtaBackgroundColor, DEFAULT_WEBSITE_COLORS.websiteCtaBackgroundColor);
     const ctaHover = normalizeHexColor(settings?.websiteCtaHoverColor, DEFAULT_WEBSITE_COLORS.websiteCtaHoverColor);
+    const effectiveCtaHover = getEffectiveCtaHoverColor(ctaBg, ctaHover);
 
     root.style.setProperty("--primary", hexToHslToken(primary));
     root.style.setProperty("--secondary", hexToHslToken(secondary));
@@ -185,6 +242,10 @@ function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty("--website-footer-bg", footerBg);
     root.style.setProperty("--website-cta-bg", ctaBg);
     root.style.setProperty("--website-cta-hover", ctaHover);
+    root.style.setProperty("--website-cta-hover-effective", effectiveCtaHover);
+    root.style.setProperty("--website-cta-bg-rgb", hexToRgbToken(ctaBg));
+    root.style.setProperty("--website-cta-hover-rgb", hexToRgbToken(ctaHover));
+    root.style.setProperty("--website-cta-hover-effective-rgb", hexToRgbToken(effectiveCtaHover));
   }, [location, settings]);
 
   return <>{children}</>;
@@ -235,7 +296,7 @@ function Router() {
   return (
     <div className={`flex flex-col min-h-screen ${isInitialLoad ? 'invisible' : ''}`}>
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow pt-24">
         <Suspense fallback={fallback}>
           <Switch>
             <Route path="/" component={Home} />

@@ -324,8 +324,8 @@ export function ConsultingStepsSection({ section, onCtaClick }: Props) {
               <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500 font-semibold">{whatWeDoLabel}</p>
               <p className="text-slate-700 leading-relaxed mt-2 text-sm">{step.whatWeDo}</p>
             </div>
-            <div className="rounded-b-2xl border border-blue-100 bg-gradient-to-r from-[#eef2ff] to-[#e0eaff] p-4">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-blue-700 font-semibold">{outcomeLabel}</p>
+            <div className="website-cta-panel rounded-b-2xl border bg-gradient-to-r p-4" style={{ backgroundImage: "linear-gradient(to right, rgb(var(--website-cta-bg-rgb) / 0.08), rgb(var(--website-cta-bg-rgb) / 0.16))" }}>
+              <p className="website-cta-text text-[11px] uppercase tracking-[0.14em] font-semibold">{outcomeLabel}</p>
               <p className="text-slate-800 leading-relaxed mt-2 text-sm font-semibold">{step.outcome}</p>
             </div>
           </div>
@@ -416,7 +416,7 @@ export function ConsultingStepsSection({ section, onCtaClick }: Props) {
             <a
               href={ctaHref}
               onClick={handleCta}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#406EF1] hover:bg-[#355CD0] text-white font-semibold shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#406EF1] whitespace-nowrap"
+              className="website-cta rounded-full px-5 py-3 hover:-translate-y-0.5"
               data-form-trigger="lead-form"
             >
               {ctaLabel}

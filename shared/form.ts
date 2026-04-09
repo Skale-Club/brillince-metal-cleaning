@@ -24,7 +24,7 @@ export type FormAnswers = {
 };
 
 // Default form configuration - used as fallback when no config in database
-// Generic service business qualification form (white-label)
+// Metal cleaning and restoration qualification form
 export const DEFAULT_FORM_CONFIG: FormConfig = {
   questions: [
     {
@@ -62,32 +62,33 @@ export const DEFAULT_FORM_CONFIG: FormConfig = {
     {
       id: "tipoNegocio",
       order: 5,
-      title: "What type of project are you looking for?",
+      title: "What type of metal cleaning or restoration do you need?",
       type: "select",
       required: true,
       options: [
-        { value: "Kitchen Remodel", label: "Kitchen Remodel", points: 10 },
-        { value: "Bathroom Remodel", label: "Bathroom Remodel", points: 10 },
-        { value: "Full Renovation", label: "Full Home Renovation", points: 10 },
-        { value: "Custom Carpentry", label: "Custom Carpentry & Finishes", points: 8 },
-        { value: "Outdoor Project", label: "Outdoor / Exterior Project", points: 8 },
+        { value: "Bronze Restoration", label: "Bronze restoration or patina work", points: 10 },
+        { value: "Iron Restoration", label: "Iron gate, fence, or railing restoration", points: 10 },
+        { value: "Stainless Steel", label: "Stainless steel cleaning or polishing", points: 9 },
+        { value: "Brass Copper", label: "Brass or copper restoration", points: 9 },
+        { value: "Architectural Metal", label: "Architectural metal cleaning", points: 8 },
         { value: "Other", label: "Other (please specify)", points: 5 },
       ],
       conditionalField: {
         showWhen: "Other",
         id: "tipoNegocioOutro",
-        title: "Please describe your project",
-        placeholder: "e.g. Garage conversion, Painting, etc.",
+        title: "Please describe what needs attention",
+        placeholder: "e.g. church statue, iron gate, brass fixture, elevator panel...",
       },
     },
     {
       id: "expectativaResultado",
       order: 6,
-      title: "When are you looking to start?",
+      title: "When are you looking to schedule the service?",
       type: "select",
       required: true,
       options: [
         { value: "ASAP", label: "As soon as possible", points: 10 },
+        { value: "Within 2 weeks", label: "Within 2 weeks", points: 9 },
         { value: "Within 1 month", label: "Within 1 month", points: 8 },
         { value: "1 to 3 months", label: "1 to 3 months", points: 5 },
         { value: "Just exploring", label: "Just exploring options", points: 3 },

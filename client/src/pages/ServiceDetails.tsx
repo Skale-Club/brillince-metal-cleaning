@@ -259,8 +259,8 @@ export default function ServiceDetails() {
             <div className="absolute inset-0 bg-slate-950/55" />
           </div>
         ) : null}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.25),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(30,41,59,0.9),transparent_55%)]" />
-        <div className="container-custom relative z-10 mx-auto w-full px-4 pt-24 pb-8 md:pt-24 md:pb-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(176,138,76,0.24),transparent_45%),radial-gradient(circle_at_18%_30%,rgba(122,96,52,0.16),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(34,27,18,0.92),transparent_55%)]" />
+        <div className="container-custom relative z-10 mx-auto w-full px-4 pt-8 pb-8 md:pt-10 md:pb-10">
           <div className="grid min-h-[320px] items-center gap-8 lg:min-h-[360px] lg:grid-cols-12">
             <div className={hasHeroImage ? "lg:col-span-6 xl:col-span-5" : "lg:col-span-12"}>
               <h1 className="mb-5 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl" data-testid="text-service-title">

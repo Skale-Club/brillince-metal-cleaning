@@ -94,6 +94,7 @@ import type {
 } from '@shared/schema';
 import { DEFAULT_FORM_CONFIG, calculateMaxScore, getSortedQuestions } from '@shared/form';
 import ghlLogo from '@assets/ghl-logo.webp';
+import sunriseHero from '@/assets/sunrise-hero.png';
 import { SiFacebook, SiGoogleanalytics, SiGoogletagmanager, SiOpenai, SiTwilio } from 'react-icons/si';
 import { DEFAULT_BUSINESS_HOURS, DEFAULT_CHAT_OBJECTIVES, SIDEBAR_MENU_ITEMS } from '@/components/admin/shared/constants';
 import {
@@ -453,12 +454,14 @@ export function HeroSettingsSection() {
               <div className="space-y-2">
                 <Label>Background Image</Label>
                 <div className="aspect-[4/3] w-full rounded-lg border-2 border-dashed border-border bg-card flex items-center justify-center overflow-hidden relative group">
-                  {heroBackgroundImageUrl ? (
-                    <img src={heroBackgroundImageUrl} alt="Background preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="text-center p-4">
-                      <Image className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-xs text-muted-foreground">Background</p>
+                  <img
+                    src={heroBackgroundImageUrl || sunriseHero}
+                    alt="Background preview"
+                    className="w-full h-full object-cover"
+                  />
+                  {!heroBackgroundImageUrl && (
+                    <div className="absolute bottom-2 left-0 right-0 text-center">
+                      <span className="text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full">default</span>
                     </div>
                   )}
                   <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer rounded-lg">

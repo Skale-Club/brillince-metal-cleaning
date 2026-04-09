@@ -30,7 +30,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   areasServedSection: {
     label: 'Service Area',
     heading: 'Areas We Serve',
-    description: '',
+    description: 'We proudly serve residential and commercial clients across Connecticut and surrounding areas. Whether you\'re in Hartford, New Haven, Bridgeport, or anywhere in between — our team comes to you.',
     ctaText: 'Get a Estimate',
   },
   consultingStepsSection: {

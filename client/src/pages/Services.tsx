@@ -85,7 +85,7 @@ export default function Services() {
   }, [servicePosts]);
 
   return (
-    <div className="min-h-[60vh] pb-32 pt-24" id="services-top">
+    <div className="min-h-[60vh] pb-32 pt-8" id="services-top">
       <div className="container-custom mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 text-slate-900">Our Services</h1>

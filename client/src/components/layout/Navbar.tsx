@@ -92,7 +92,7 @@ export function Navbar() {
               ))}
             </div>
             {displayPhone && (
-              <a href={`tel:${telPhone}`} onClick={() => import("@/lib/analytics").then(m => m.trackEvent("contact_click", { location: "header", label: "phone" }))} className="px-4 py-2 bg-[var(--website-cta-bg)] hover:bg-[var(--website-cta-hover)] text-white font-bold rounded-full hover-elevate transition-all text-sm flex items-center gap-2">
+              <a href={`tel:${telPhone}`} onClick={() => import("@/lib/analytics").then(m => m.trackEvent("contact_click", { location: "header", label: "phone" }))} className="website-cta rounded-full px-4 py-2 text-sm font-bold hover-elevate">
                 <Phone className="w-4 h-4 fill-current" />
                 {displayPhone}
               </a>
