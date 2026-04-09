@@ -543,16 +543,31 @@ export function GallerySection() {
     mutationFn: async (imageIds: number[]) => {
       await apiRequest("POST", "/api/gallery/reorder", { imageIds });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/gallery"] });
+    onMutate: async (imageIds: number[]) => {
+      // Cancel any in-flight refetches so they don't overwrite the optimistic update
+      await queryClient.cancelQueries({ queryKey: ["/api/gallery"] });
+      const previousImages = queryClient.getQueryData<GalleryImage[]>(["/api/gallery"]);
+      // Immediately update the cache to the new order so useEffect stays in sync
+      if (previousImages) {
+        const imageMap = new Map(previousImages.map((img) => [img.id, img]));
+        const reordered = imageIds
+          .map((id) => imageMap.get(id))
+          .filter((img): img is GalleryImage => img !== undefined);
+        queryClient.setQueryData(["/api/gallery"], reordered);
+      }
+      return { previousImages };
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _imageIds, context) => {
+      // Revert cache and local state on failure
+      if (context?.previousImages) {
+        queryClient.setQueryData(["/api/gallery"], context.previousImages);
+        setOrderedImages(context.previousImages);
+      }
       toast({
         title: "Failed to reorder images",
         description: error.message,
         variant: "destructive",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/gallery"] });
     },
   });
 
@@ -952,11 +967,12 @@ export function GallerySection() {
               onDragOver={(e) => handleCardDragOver(image.id, e)}
               onDrop={(e) => handleCardDrop(image.id, e)}
               onDragEnd={() => {
-                // If dropped outside a valid target, revert to the original order
-                if (previewOrderRef.current) {
+                // Only revert if the drop never landed on a valid card target
+                // (draggedImageId is still set = handleCardDrop never ran)
+                if (draggedImageId !== null && previewOrderRef.current) {
                   setOrderedImages(previewOrderRef.current);
-                  previewOrderRef.current = null;
                 }
+                previewOrderRef.current = null;
                 setDraggedImageId(null);
                 setDragOverImageId(null);
                 setActiveMouseCardId(null);
