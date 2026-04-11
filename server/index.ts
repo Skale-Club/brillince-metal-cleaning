@@ -2,7 +2,16 @@ import 'dotenv/config';
 import { createApp, log } from "./app.js";
 import { serveStatic } from "./static.js";
 
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] uncaughtException:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] unhandledRejection:', reason);
+});
+
 (async () => {
+  try {
   const { app, httpServer } = await createApp();
 
   // importantly only setup vite in development and after
@@ -29,4 +38,8 @@ import { serveStatic } from "./static.js";
       log(`serving on port ${port}`);
     },
   );
+  } catch (err) {
+    console.error('[FATAL] Startup error:', err);
+    process.exit(1);
+  }
 })();

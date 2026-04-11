@@ -346,7 +346,7 @@ export default function Home() {
                   />
                 </div>
               ) : null}
-              <h1 className="text-5xl sm:text-[3.9rem] md:text-[3.9rem] lg:text-6xl xl:text-7xl font-bold mb-3 lg:mb-6 font-display leading-[1.05] sm:leading-[1.05] lg:leading-[1.1]">
+              <h1 className="text-[2.5rem] sm:text-[3.9rem] md:text-[3.9rem] lg:text-6xl xl:text-7xl font-bold mb-3 lg:mb-6 font-display leading-[1.05] sm:leading-[1.05] lg:leading-[1.1]">
                 {companySettings?.heroTitle ? (
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200">
                     {companySettings.heroTitle.split('. ').map((part, i, arr) => (

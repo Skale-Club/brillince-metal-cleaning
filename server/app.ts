@@ -88,7 +88,11 @@ export async function createApp(): Promise<{ app: express.Express; httpServer: S
         "[app] Skipping runtime schema init because DATABASE_URL still has placeholder password."
       );
     } else {
-      await initializeSchemas();
+      try {
+        await initializeSchemas();
+      } catch (err) {
+        console.error("[app] initializeSchemas failed (non-fatal):", err);
+      }
     }
   }
 
@@ -98,8 +102,12 @@ export async function createApp(): Promise<{ app: express.Express; httpServer: S
       "[app] Skipping Supabase auth/session setup until real database credentials are configured."
     );
   } else {
-    const { setupSupabaseAuth } = await import("./auth/supabaseAuth.js");
-    await setupSupabaseAuth(app);
+    try {
+      const { setupSupabaseAuth } = await import("./auth/supabaseAuth.js");
+      await setupSupabaseAuth(app);
+    } catch (err) {
+      console.error("[app] setupSupabaseAuth failed (non-fatal):", err);
+    }
   }
 
   const httpServer = createServer(app);
