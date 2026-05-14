@@ -486,7 +486,7 @@ export default function Home() {
             <Link href="/submit-review">
               <a className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-primary text-primary-foreground font-bold text-base shadow hover:opacity-90 transition-opacity">
                 <Star className="w-5 h-5 fill-current" />
-                Deixe seu review
+                Leave a Review
               </a>
             </Link>
           </div>

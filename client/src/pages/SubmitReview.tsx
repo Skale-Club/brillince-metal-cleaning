@@ -31,11 +31,11 @@ export default function SubmitReview() {
     setError(null);
 
     if (!form.authorName.trim()) {
-      setError("Por favor, informe seu nome.");
+      setError("Please enter your name.");
       return;
     }
     if (form.content.trim().length < 10) {
-      setError("O texto do review deve ter pelo menos 10 caracteres.");
+      setError("Your review must be at least 10 characters.");
       return;
     }
 
@@ -50,7 +50,7 @@ export default function SubmitReview() {
       });
       setSubmitted(true);
     } catch (err: any) {
-      setError(err?.message || "Erro ao enviar review. Tente novamente.");
+      setError(err?.message || "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -65,12 +65,12 @@ export default function SubmitReview() {
               <Star className="w-8 h-8 fill-green-500 text-green-500" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">Obrigado pelo seu review!</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Thank you for your review!</h1>
           <p className="text-slate-600">
-            Seu review foi enviado e será publicado após aprovação.
+            Your review has been submitted and will be visible shortly.
           </p>
           <Link href="/">
-            <Button className="rounded-full mt-2">Voltar ao início</Button>
+            <Button className="rounded-full mt-2">Back to Home</Button>
           </Link>
         </div>
       </div>
@@ -81,14 +81,13 @@ export default function SubmitReview() {
     <div className="min-h-[60vh] py-16 px-4">
       <div className="max-w-xl mx-auto space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-slate-800">Deixe seu review</h1>
-          <p className="text-slate-600">Sua opinião nos ajuda a melhorar e ajuda outros clientes.</p>
+          <h1 className="text-3xl font-bold text-slate-800">Leave a Review</h1>
+          <p className="text-slate-600">Your feedback helps us improve and helps other customers.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 space-y-6">
-          {/* Star rating */}
           <div className="space-y-2">
-            <Label>Avaliação</Label>
+            <Label>Rating</Label>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -98,7 +97,7 @@ export default function SubmitReview() {
                   onMouseEnter={() => setHovered(star)}
                   onMouseLeave={() => setHovered(0)}
                   className="p-0.5 focus:outline-none"
-                  aria-label={`${star} estrelas`}
+                  aria-label={`${star} star${star > 1 ? "s" : ""}`}
                 >
                   <Star
                     className={`w-8 h-8 transition-colors ${
@@ -110,42 +109,42 @@ export default function SubmitReview() {
                 </button>
               ))}
               <span className="ml-2 text-sm text-slate-500">
-                {form.rating === 5 ? "Excelente" : form.rating === 4 ? "Ótimo" : form.rating === 3 ? "Bom" : form.rating === 2 ? "Regular" : "Ruim"}
+                {form.rating === 5 ? "Excellent" : form.rating === 4 ? "Great" : form.rating === 3 ? "Good" : form.rating === 2 ? "Fair" : "Poor"}
               </span>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="authorName">Seu nome *</Label>
+            <Label htmlFor="authorName">Your name *</Label>
             <Input
               id="authorName"
               value={form.authorName}
               onChange={(e) => set("authorName", e.target.value)}
-              placeholder="João Silva"
+              placeholder="John Smith"
               maxLength={120}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="authorMeta">
-              Cidade / Descrição <span className="text-slate-400 font-normal">(opcional)</span>
+              Location / Description <span className="text-slate-400 font-normal">(optional)</span>
             </Label>
             <Input
               id="authorMeta"
               value={form.authorMeta}
               onChange={(e) => set("authorMeta", e.target.value)}
-              placeholder="São Paulo, SP"
+              placeholder="Miami, FL"
               maxLength={160}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Review *</Label>
+            <Label htmlFor="content">Your review *</Label>
             <Textarea
               id="content"
               value={form.content}
               onChange={(e) => set("content", e.target.value)}
-              placeholder="Conte sobre sua experiência com nosso serviço..."
+              placeholder="Tell us about your experience with our service..."
               className="min-h-[120px]"
               maxLength={1200}
             />
@@ -159,7 +158,7 @@ export default function SubmitReview() {
           )}
 
           <Button type="submit" disabled={submitting} className="w-full rounded-full">
-            {submitting ? "Enviando..." : "Enviar review"}
+            {submitting ? "Submitting..." : "Submit Review"}
           </Button>
         </form>
       </div>
