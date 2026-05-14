@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   insertReviewItemSchema,
   insertReviewsSettingsSchema,
+  submitReviewSchema,
 } from "#shared/schema.js";
 import { storage } from "../storage.js";
 import { safeErrorMessage } from "./errorUtils.js";
@@ -47,13 +48,34 @@ export function registerReviewsRoutes(app: Express, requireAdmin: any) {
     }
   });
 
+  app.post("/api/reviews/submit", async (req, res) => {
+    try {
+      const payload = submitReviewSchema.parse(req.body);
+      await storage.createReviewItem({
+        ...payload,
+        authorMeta: payload.authorMeta ?? "",
+        sourceLabel: payload.sourceLabel ?? "Site",
+        isActive: true,
+        status: "approved",
+        sortOrder: 0,
+      });
+      res.status(201).json({ success: true });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: err.errors });
+      }
+      res.status(500).json({ message: safeErrorMessage(err, 'Internal server error') });
+    }
+  });
+
   app.get("/api/admin/reviews", requireAdmin, async (_req, res) => {
     try {
-      const [settings, items] = await Promise.all([
+      const [settings, items, pendingItems] = await Promise.all([
         storage.getReviewsSettings(),
         storage.getReviewItems(false),
+        storage.getPendingReviewItems(),
       ]);
-      res.json({ settings, items });
+      res.json({ settings, items, pendingItems });
     } catch (err) {
       res.status(500).json({ message: safeErrorMessage(err, 'Internal server error') });
     }
@@ -105,6 +127,19 @@ export function registerReviewsRoutes(app: Express, requireAdmin: any) {
       }).parse(req.body);
       await storage.reorderReviewItems(payload.itemIds);
       res.json({ success: true });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: err.errors });
+      }
+      res.status(400).json({ message: safeErrorMessage(err, 'Invalid request') });
+    }
+  });
+
+  app.put("/api/admin/reviews/items/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const { status } = z.object({ status: z.enum(["approved", "rejected"]) }).parse(req.body);
+      const item = await storage.updateReviewItemStatus(Number(req.params.id), status);
+      res.json(item);
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ message: "Validation error", errors: err.errors });

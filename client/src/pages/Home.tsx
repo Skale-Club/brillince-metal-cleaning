@@ -482,6 +482,14 @@ export default function Home() {
           {!reviewsUseWidget && reviewsUseFallback && fallbackReviews.length > 0 ? (
             <ReviewsCarouselSection reviews={fallbackReviews} />
           ) : null}
+          <div className="flex justify-center py-8">
+            <Link href="/submit-review">
+              <a className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-primary text-primary-foreground font-bold text-base shadow hover:opacity-90 transition-opacity">
+                <Star className="w-5 h-5 fill-current" />
+                Deixe seu review
+              </a>
+            </Link>
+          </div>
         </div>
       </section>
       )}

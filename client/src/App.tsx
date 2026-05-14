@@ -67,6 +67,7 @@ const Contact = lazy(() => import("@/pages/Contact").then(m => ({ default: () =>
 const Faq = lazy(() => import("@/pages/Faq").then(m => ({ default: () => <PageWrapper><m.default /></PageWrapper> })));
 const Blog = lazy(() => import("@/pages/Blog").then(m => ({ default: () => <PageWrapper><m.default /></PageWrapper> })));
 const BlogPost = lazy(() => import("@/pages/BlogPost").then(m => ({ default: () => <PageWrapper><m.default /></PageWrapper> })));
+const SubmitReview = lazy(() => import("@/pages/SubmitReview").then(m => ({ default: () => <PageWrapper><m.default /></PageWrapper> })));
 
 const DEFAULT_WEBSITE_COLORS = {
   websitePrimaryColor: "#1C53A3",
@@ -310,6 +311,7 @@ function Router() {
             <Route path="/faq" component={Faq} />
             <Route path="/blog" component={Blog} />
             <Route path="/blog/:slug" component={BlogPost} />
+            <Route path="/submit-review" component={SubmitReview} />
             <Route component={NotFound} />
           </Switch>
         </Suspense>

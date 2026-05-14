@@ -338,6 +338,7 @@ async function ensureReviewsSchema() {
       ALTER TABLE review_items ADD COLUMN IF NOT EXISTS rating integer NOT NULL DEFAULT 5;
       ALTER TABLE review_items ADD COLUMN IF NOT EXISTS source_label text NOT NULL DEFAULT '';
       ALTER TABLE review_items ADD COLUMN IF NOT EXISTS is_active boolean NOT NULL DEFAULT true;
+      ALTER TABLE review_items ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'approved';
       ALTER TABLE review_items ADD COLUMN IF NOT EXISTS created_at timestamp DEFAULT now();
       ALTER TABLE review_items ADD COLUMN IF NOT EXISTS updated_at timestamp DEFAULT now();
       ALTER TABLE reviews_settings ALTER COLUMN section_title SET DEFAULT '';
@@ -462,8 +463,10 @@ export interface IStorage {
   getReviewsSettings(): Promise<ReviewsSettings>;
   upsertReviewsSettings(settings: Partial<InsertReviewsSettings>): Promise<ReviewsSettings>;
   getReviewItems(onlyActive?: boolean): Promise<ReviewItem[]>;
+  getPendingReviewItems(): Promise<ReviewItem[]>;
   createReviewItem(item: InsertReviewItem): Promise<ReviewItem>;
   updateReviewItem(id: number, item: Partial<InsertReviewItem>): Promise<ReviewItem>;
+  updateReviewItemStatus(id: number, status: "approved" | "rejected"): Promise<ReviewItem>;
   reorderReviewItems(itemIds: number[]): Promise<void>;
   deleteReviewItem(id: number): Promise<void>;
 
@@ -1408,14 +1411,38 @@ export class DatabaseStorage implements IStorage {
       return await db
         .select()
         .from(reviewItems)
-        .where(eq(reviewItems.isActive, true))
+        .where(and(eq(reviewItems.isActive, true), eq(reviewItems.status, "approved")))
         .orderBy(asc(reviewItems.sortOrder), desc(reviewItems.createdAt));
     }
 
     return await db
       .select()
       .from(reviewItems)
+      .where(eq(reviewItems.status, "approved"))
       .orderBy(asc(reviewItems.sortOrder), desc(reviewItems.createdAt));
+  }
+
+  async getPendingReviewItems(): Promise<ReviewItem[]> {
+    await ensureReviewsSchema();
+    return await db
+      .select()
+      .from(reviewItems)
+      .where(eq(reviewItems.status, "pending"))
+      .orderBy(desc(reviewItems.createdAt));
+  }
+
+  async updateReviewItemStatus(id: number, status: "approved" | "rejected"): Promise<ReviewItem> {
+    await ensureReviewsSchema();
+    const patch: Partial<typeof reviewItems.$inferInsert> =
+      status === "approved"
+        ? { status, isActive: true, updatedAt: new Date() }
+        : { status, isActive: false, updatedAt: new Date() };
+    const [updated] = await db
+      .update(reviewItems)
+      .set(patch)
+      .where(eq(reviewItems.id, id))
+      .returning();
+    return updated;
   }
 
   async createReviewItem(item: InsertReviewItem): Promise<ReviewItem> {

@@ -643,6 +643,7 @@ export const reviewItems = pgTable("review_items", {
   rating: integer("rating").notNull().default(5),
   sourceLabel: text("source_label").notNull().default(""),
   isActive: boolean("is_active").notNull().default(true),
+  status: text("status").notNull().default("approved"), // approved | pending | rejected
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -659,6 +660,8 @@ export const insertReviewsSettingsSchema = createInsertSchema(reviewsSettings).o
   displayMode: reviewsDisplayModeSchema.optional(),
 });
 
+const reviewStatusSchema = z.enum(["approved", "pending", "rejected"]);
+
 export const insertReviewItemSchema = createInsertSchema(reviewItems).omit({
   id: true,
   createdAt: true,
@@ -670,7 +673,18 @@ export const insertReviewItemSchema = createInsertSchema(reviewItems).omit({
   rating: z.number().int().min(1).max(5).optional(),
   sourceLabel: z.string().max(120).optional(),
   sortOrder: z.number().int().min(0).optional(),
+  status: reviewStatusSchema.optional(),
 });
+
+export const submitReviewSchema = z.object({
+  authorName: z.string().min(1).max(120),
+  authorMeta: z.string().max(160).optional(),
+  content: z.string().min(10).max(1200),
+  rating: z.number().int().min(1).max(5),
+  sourceLabel: z.string().max(120).optional(),
+});
+
+export type SubmitReview = z.infer<typeof submitReviewSchema>;
 
 export type ReviewsSettings = typeof reviewsSettings.$inferSelect;
 export type ReviewItem = typeof reviewItems.$inferSelect;

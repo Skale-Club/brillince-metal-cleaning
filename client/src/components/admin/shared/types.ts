@@ -203,6 +203,7 @@ export interface ReviewItemData {
   rating: number;
   sourceLabel: string;
   isActive: boolean;
+  status: 'approved' | 'pending' | 'rejected';
   createdAt?: string | Date | null;
   updatedAt?: string | Date | null;
 }
@@ -210,4 +211,5 @@ export interface ReviewItemData {
 export interface AdminReviewsResponse {
   settings: ReviewsSettingsData;
   items: ReviewItemData[];
+  pendingItems: ReviewItemData[];
 }
